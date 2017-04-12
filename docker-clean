@@ -1,0 +1,25 @@
+#!/bin/sh
+
+echo "[36mRemoving exited containers[0m"
+if [ "`docker ps -a -f status=exited -f status=created -q`" != "" ] ; then
+    docker rm $(docker ps -a -f status=exited -f status=created -q)
+else
+    echo "No exited containers"
+fi
+echo
+
+echo "[36mRemoving unused images[0m"
+if [ "`docker images | grep "<none>" | sed -e 's/^ *<none> *<none> *//' | cut -d' ' -f1`" != "" ] ; then
+    docker images | grep "<none>" | sed -e 's/^ *<none> *<none> *//' | cut -d' ' -f1 | xargs docker rmi
+else
+    echo "No unused images"
+fi
+echo
+
+echo "[36mRunning[0m"
+docker ps -a
+echo
+
+echo "[36mImages[0m"
+docker images
+echo

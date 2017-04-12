@@ -1,0 +1,4 @@
+#!/bin/sh
+
+docker run -it --name drill --hostname drill -e "TERM=xterm-256color" guzo/base drill $*
+docker rm drill

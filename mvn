@@ -1,0 +1,4 @@
+#!/bin/sh
+
+docker run -it --name maven --hostname maven -e "TERM=xterm-256color" -v "$PWD":/usr/src/mymaven -w /usr/src/mymaven maven mvn $*
+docker rm maven

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "[36mStopping all containers[0m"
+if [ "`docker ps -aq`" != "" ] ; then
+    docker ps -aq | xargs docker stop
+else
+    echo "No running containers"
+fi
+echo
+
+docker-clean

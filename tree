@@ -1,0 +1,4 @@
+#!/bin/sh
+
+docker run -it --name tree --hostname tree -e "TERM=xterm-256color" -v "$PWD":/usr/src/tree -w /usr/src/tree guzo/base tree $*
+docker rm tree
