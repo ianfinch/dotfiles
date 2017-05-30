@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Set variables
+REPO="localhost:5000"
+
+# Derived variables
+SCRIPT_NAME=$(basename "$0")
+
+# Print out help text
+help() {
+
+    cat >&2 <<-EOF
+    Syntax:
+        $SCRIPT_NAME list  - See what is in the docker repo
+        $SCRIPT_NAME push  - Put any local docker images into the repo
+EOF
+}
+
+# Print out help text and then exit
+helpAndExit() {
+    help
+    exit 1
+}
+
+# Check syntax and get command option
+[ $# -gt 0 ] || helpAndExit
+COMMAND=$1
+shift 1
+
+case "$COMMAND" in
+
+    list)
+         curl -s http://${REPO}/v2/_catalog | sed -e 's/^[^[]*//' -e 's/","/\n/g' -e 's/^\["//' -e 's/"\].*//'
+        ;;
+
+    push)
+        docker images | grep "^${REPO}" | sed 's/ .*//' | while read line ; do
+            docker push $line
+            echo
+        done
+        ;;
+
+    -h | --h | -help | --help | help)
+        help
+        ;;
+
+    *)
+        help
+        ;;
+
+esac

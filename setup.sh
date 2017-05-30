@@ -6,14 +6,8 @@ if [[ `whoami` != "root" ]] ; then
 fi
 
 # Find out who we are
-if [[ -e /c/Users ]] ; then
-    WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
-else
-    WINDOWS_USER="unknown.user"
-fi
-LOCAL_USER="`logname`"
+WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
 echo
-echo "Assuming local user: ${LOCAL_USER}"
 echo "Assuming windows user: ${WINDOWS_USER}"
 echo
 
@@ -24,16 +18,12 @@ REGISTRY_NAME="registry-local"
 RESOURCES="${DOCKER_SCRIPTS}/resources"
 CACHE="${DOCKER_SCRIPTS}/cache"
 WINDOWS_HOME="/c/Users/${WINDOWS_USER}"
-VM_HOME="/home/${LOCAL_USER}"
+VM_HOME="/home/docker"
 
 # Count the steps
 n=1
 max=`grep expr $0 | wc -l`  # This introduces one more 'expr' line than we need
 max=`expr ${max} - 2`       # So subtract from the total (+ the additional one this introduces)
-
-if [[ ! -e $CACHE ]] ; then
-    mkdir $CACHE
-fi
 
 echo "[${n}/${max}] Copying utility scripts" ; n=`expr $n + 1`
 cp ${DOCKER_SCRIPTS}/vim ${BIN}/vim
@@ -43,6 +33,7 @@ cp ${DOCKER_SCRIPTS}/perl ${BIN}/perl
 cp ${DOCKER_SCRIPTS}/drill ${BIN}/drill
 cp ${DOCKER_SCRIPTS}/docker-clean ${BIN}/docker-clean
 cp ${DOCKER_SCRIPTS}/docker-kill ${BIN}/docker-kill
+cp ${DOCKER_SCRIPTS}/docker-repo ${BIN}/docker-repo
 
 echo "[${n}/${max}] Adding bin to path" ; n=`expr $n + 1`
 echo "export PATH=$PATH:$BIN" > /etc/profile.d/set-path.sh
@@ -53,8 +44,8 @@ cp ${RESOURCES}/set-prompt.sh /etc/profile.d/set-prompt.sh
 chmod +x /etc/profile.d/set-prompt.sh
 
 echo "[${n}/${max}] Removing custom profile" ; n=`expr $n + 1`
-if [[ -e ${VM_HOME}/.profile ]] ; then
-    mv ${VM_HOME}/.profile ${VM_HOME}/.profile.bak
+if [[ -e /home/docker/.profile ]] ; then
+    mv /home/docker/.profile /home/docker/.profile.bak
 fi
 
 echo "[${n}/${max}] Installing bash" ; n=`expr $n + 1`
@@ -71,9 +62,7 @@ chmod +x ${BIN}/docker-compose
 
 echo "[${n}/${max}] Starting local docker repository" ; n=`expr $n + 1`
 if [[ "`docker ps --filter name=${REGISTRY_NAME} -q`" == "" ]] ; then
-    if [[ "`uname -m`" == "i686" ]] ; then
-    	docker run -d -p 5000:5000 --restart=always --name ${REGISTRY_NAME} registry:2
-    fi
+    docker run -d -p 5000:5000 --restart=always --name ${REGISTRY_NAME} registry:2
 fi
 
 echo "[${n}/${max}] Installing weaveworks kubernetes scope" ; n=`expr $n + 1`
