@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [[ "$1" == "bash" ]] ; then
+    docker run -ti --name gcloud --hostname gcloud --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" guzo/gcloud bash
+else
+    docker run -ti --name gcloud --hostname gcloud --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" guzo/gcloud gcloud $*
+fi
+docker rm gcloud

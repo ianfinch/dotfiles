@@ -31,6 +31,9 @@ cp ${DOCKER_SCRIPTS}/tree ${BIN}/tree
 cp ${DOCKER_SCRIPTS}/lein ${BIN}/lein
 cp ${DOCKER_SCRIPTS}/perl ${BIN}/perl
 cp ${DOCKER_SCRIPTS}/drill ${BIN}/drill
+cp ${DOCKER_SCRIPTS}/gcloud ${BIN}/gcloud
+cp ${DOCKER_SCRIPTS}/hugo ${BIN}/hugo
+cp ${DOCKER_SCRIPTS}/npm ${BIN}/npm
 cp ${DOCKER_SCRIPTS}/docker-clean ${BIN}/docker-clean
 cp ${DOCKER_SCRIPTS}/docker-kill ${BIN}/docker-kill
 cp ${DOCKER_SCRIPTS}/docker-repo ${BIN}/docker-repo

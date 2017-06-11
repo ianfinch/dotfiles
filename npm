@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [[ "$1" == "bash" ]] ; then
+    docker run -ti --name npm --hostname npm --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:/usr/src/npm -w /usr/src/npm guzo/npm bash
+else
+    docker run -ti --name npm --hostname npm --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:/usr/src/npm -w /usr/src/npm guzo/npm npm $*
+fi
+docker rm npm
