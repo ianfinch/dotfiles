@@ -27,12 +27,14 @@ max=`expr ${max} - 2`       # So subtract from the total (+ the additional one t
 
 echo "[${n}/${max}] Copying utility scripts" ; n=`expr $n + 1`
 cp ${DOCKER_SCRIPTS}/vim ${BIN}/vim
+ln -s ${BIN}/vim ${BIN}/vimx # Alias in case a version of 'vim' is already earlier in the path
 cp ${DOCKER_SCRIPTS}/tree ${BIN}/tree
 cp ${DOCKER_SCRIPTS}/lein ${BIN}/lein
 cp ${DOCKER_SCRIPTS}/perl ${BIN}/perl
 cp ${DOCKER_SCRIPTS}/drill ${BIN}/drill
 cp ${DOCKER_SCRIPTS}/gcloud ${BIN}/gcloud
 cp ${DOCKER_SCRIPTS}/hugo ${BIN}/hugo
+cp ${DOCKER_SCRIPTS}/node ${BIN}/node
 cp ${DOCKER_SCRIPTS}/npm ${BIN}/npm
 cp ${DOCKER_SCRIPTS}/docker-clean ${BIN}/docker-clean
 cp ${DOCKER_SCRIPTS}/docker-kill ${BIN}/docker-kill
@@ -57,6 +59,9 @@ if [[ -e /usr/bin/tce && ! -e /usr/local/bin/bash ]] ; then
 fi
 
 echo "[${n}/${max}] Installing docker-compose" ; n=`expr $n + 1`
+if [[ ! -e ${CACHE} ]] ; then
+    mkdir ${CACHE}
+fi
 if [[ ! -e ${CACHE}/docker-compose ]] ; then
     curl -Ls "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)" -o ${CACHE}/docker-compose
 fi

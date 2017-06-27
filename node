@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [[ "$1" == "bash" ]] ; then
+    docker run -ti --name node --hostname node --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:/usr/src/node -w /usr/src/node guzo/npm bash
+else
+    docker run -ti --name node --hostname node --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:/usr/src/node -w /usr/src/node guzo/npm node $*
+fi
+docker rm node

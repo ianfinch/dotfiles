@@ -1,8 +1,8 @@
 #!/bin/sh
 
 if [[ "$1" == "bash" ]] ; then
-    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8080:8080 -v $PWD:/usr/src/hugo -w /usr/src/hugo guzo/hugo bash
+    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8888:8080 -v $PWD:/usr/src/hugo -w /usr/src/hugo guzo/hugo bash
 else
-    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8080:8080 -v $PWD:/usr/src/hugo -w /usr/src/hugo guzo/hugo hugo $*
+    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8888:8080 -v $PWD:/usr/src/hugo -w /usr/src/hugo guzo/hugo hugo $*
 fi
 docker rm hugo
