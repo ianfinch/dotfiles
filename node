@@ -1,8 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
+machine=$(uname -m)
+case "$machine" in
+
+    x86_64)
+        dockerImage="guzo/npm"
+        ;;
+
+    armv7l)
+        dockerImage="guzo/npm:rpi"
+        ;;
+
+    *)
+        echo "Unsupported architecture: $machine"
+        exit 1
+        ;;
+esac
+
+targetDir="/usr/src/node"
 if [[ "$1" == "bash" ]] ; then
-    docker run -ti --name node --hostname node --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:/usr/src/node -w /usr/src/node guzo/npm bash
+    docker run -ti --name node --hostname node --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:$targetDir -w $targetDir $dockerImage bash
 else
-    docker run -ti --name node --hostname node --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:/usr/src/node -w /usr/src/node guzo/npm node $*
+    docker run -ti --name node --hostname node --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -v $PWD:$targetDir -w $targetDir $dockerImage node $*
 fi
 docker rm node

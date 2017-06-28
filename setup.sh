@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [[ `whoami` != "root" ]] ; then
     echo "Must be run as root (try typing sudo $0)"
@@ -6,10 +6,12 @@ if [[ `whoami` != "root" ]] ; then
 fi
 
 # Find out who we are
-WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
-echo
+if [[ -e /c/Users ]] ; then
+    WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
+else
+    WINDOWS_USER="nobody"
+fi
 echo "Assuming windows user: ${WINDOWS_USER}"
-echo
 
 # Variables
 DOCKER_SCRIPTS="`dirname $0`"
@@ -27,7 +29,6 @@ max=`expr ${max} - 2`       # So subtract from the total (+ the additional one t
 
 echo "[${n}/${max}] Copying utility scripts" ; n=`expr $n + 1`
 cp ${DOCKER_SCRIPTS}/vim ${BIN}/vim
-ln -s ${BIN}/vim ${BIN}/vimx # Alias in case a version of 'vim' is already earlier in the path
 cp ${DOCKER_SCRIPTS}/tree ${BIN}/tree
 cp ${DOCKER_SCRIPTS}/lein ${BIN}/lein
 cp ${DOCKER_SCRIPTS}/perl ${BIN}/perl
@@ -39,6 +40,12 @@ cp ${DOCKER_SCRIPTS}/npm ${BIN}/npm
 cp ${DOCKER_SCRIPTS}/docker-clean ${BIN}/docker-clean
 cp ${DOCKER_SCRIPTS}/docker-kill ${BIN}/docker-kill
 cp ${DOCKER_SCRIPTS}/docker-repo ${BIN}/docker-repo
+
+# Alias in case a version of 'vim' is already earlier in the path
+if [[ -e ${BIN}/vimx ]] ; then
+    rm ${BIN}/vimx
+fi
+ln -s ${BIN}/vim ${BIN}/vimx
 
 echo "[${n}/${max}] Adding bin to path" ; n=`expr $n + 1`
 echo "export PATH=$PATH:$BIN" > /etc/profile.d/set-path.sh

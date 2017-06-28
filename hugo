@@ -1,8 +1,22 @@
 #!/bin/sh
 
+machine=$(uname -m)
+case "$machine" in
+
+    x86_64)
+        dockerImage = "guzo/hugo"
+        ;;
+
+    *)
+        echo "Unsupported architecture: $machine"
+        exit 1
+        ;;
+esac
+
+targetDir="/usr/src/hugo"
 if [[ "$1" == "bash" ]] ; then
-    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8888:8080 -v $PWD:/usr/src/hugo -w /usr/src/hugo guzo/hugo bash
+    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8888:8080 -v $PWD:$targetDir -w $targetDir $dockerImage bash
 else
-    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8888:8080 -v $PWD:/usr/src/hugo -w /usr/src/hugo guzo/hugo hugo $*
+    docker run -ti --name hugo --hostname hugo --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color" -p 8888:8080 -v $PWD:$targetDir -w $targetDir $dockerImage hugo $*
 fi
 docker rm hugo
