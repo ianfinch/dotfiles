@@ -15,6 +15,7 @@ echo "Assuming windows user: ${WINDOWS_USER}"
 
 # Variables
 DOCKER_SCRIPTS="`dirname $0`"
+STAGE_BIN="/tmp/stage-bin"
 BIN="/usr/local/bin"
 REGISTRY_NAME="registry-local"
 RESOURCES="${DOCKER_SCRIPTS}/resources"
@@ -28,18 +29,40 @@ max=`grep expr $0 | wc -l`  # This introduces one more 'expr' line than we need
 max=`expr ${max} - 2`       # So subtract from the total (+ the additional one this introduces)
 
 echo "[${n}/${max}] Copying utility scripts" ; n=`expr $n + 1`
-cp ${DOCKER_SCRIPTS}/vim ${BIN}/vim
-cp ${DOCKER_SCRIPTS}/tree ${BIN}/tree
-cp ${DOCKER_SCRIPTS}/lein ${BIN}/lein
-cp ${DOCKER_SCRIPTS}/perl ${BIN}/perl
-cp ${DOCKER_SCRIPTS}/drill ${BIN}/drill
-cp ${DOCKER_SCRIPTS}/gcloud ${BIN}/gcloud
-cp ${DOCKER_SCRIPTS}/hugo ${BIN}/hugo
-cp ${DOCKER_SCRIPTS}/node ${BIN}/node
-cp ${DOCKER_SCRIPTS}/npm ${BIN}/npm
+
+# First we create scripts for dockerised commands
+mkdir -p ${STAGE_BIN}
+
+# Anything from our base image
+echo "tree,drill," | while read -d ',' cmd ; do
+    ./generic-command $cmd guzo/base > ${STAGE_BIN}/$cmd
+done;
+
+# Commands which only have an x86 version
+echo "vim,perl,gcloud," | while read -d ',' cmd ; do
+    ./generic-command $cmd > ${STAGE_BIN}/$cmd
+done;
+
+# Commands which also have an ARM version
+echo "hugo,npm," | while read -d ',' cmd ; do
+    ./generic-command $cmd x86_64=guzo/$cmd,armv7l=guzo/$cmd:rpi > ${STAGE_BIN}/$cmd
+done;
+
+# Special cases
+./generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi > ${STAGE_BIN}/node
+./generic-command lein clojure -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
+./generic-command mvn maven > ${STAGE_BIN}/mvn
+
+# Some docker utilities
 cp ${DOCKER_SCRIPTS}/docker-clean ${BIN}/docker-clean
 cp ${DOCKER_SCRIPTS}/docker-kill ${BIN}/docker-kill
 cp ${DOCKER_SCRIPTS}/docker-repo ${BIN}/docker-repo
+
+# Move commands from our staging area
+chmod +x ${STAGE_BIN}/*
+cp ${STAGE_BIN}/* ${BIN}
+rm ${STAGE_BIN}/*
+rmdir ${STAGE_BIN}
 
 # Alias in case a version of 'vim' is already earlier in the path
 if [[ -e ${BIN}/vimx ]] ; then
@@ -75,11 +98,6 @@ fi
 cp ${CACHE}/docker-compose ${BIN}/docker-compose
 chmod +x ${BIN}/docker-compose
 
-echo "[${n}/${max}] Starting local docker repository" ; n=`expr $n + 1`
-if [[ "`docker ps --filter name=${REGISTRY_NAME} -q`" == "" ]] ; then
-    docker run -d -p 5000:5000 --restart=always --name ${REGISTRY_NAME} registry:2
-fi
-
 echo "[${n}/${max}] Installing weaveworks kubernetes scope" ; n=`expr $n + 1`
 if [[ ! -e ${CACHE}/scope ]] ; then
     curl -L git.io/scope -o ${CACHE}/scope
@@ -99,5 +117,5 @@ if [[ -e ${WINDOWS_HOME}/repositories && ! -e ${VM_HOME}/Repositories ]] ; then
 fi
 
 echo
-echo "Now type: exec $SHELL -l"
+echo "Now type: exec bash -l"
 echo

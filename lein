@@ -1,8 +1,0 @@
-#!/bin/sh
-
-if [[ "$1" == "bash" ]] ; then
-    docker run -it --name clojure --hostname clojure -e "TERM=xterm-256color" -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -v "$PWD":/usr/src/clj -w /usr/src/clj -p 3000:3000 clojure bash
-else
-    docker run -it --name clojure --hostname clojure -e "TERM=xterm-256color" -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -v "$PWD":/usr/src/clj -w /usr/src/clj -p 3000:3000 clojure lein $*
-fi
-docker rm clojure

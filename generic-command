@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Print out help text
+SCRIPT_NAME=$(basename "$0")
+help() {
+
+    cat >&2 <<-ENDOFHELP
+Syntax: $SCRIPT_NAME <command> [<docker image>] [<options>]
+ENDOFHELP
+}
+
+# Print out help text and then exit
+helpAndExit() {
+    help
+    exit 1
+}
+
+# Check syntax and get command options
+[ $# -gt 0 ] || helpAndExit
+COMMAND="$1"
+shift
+
+if [[ "$1" == "" ]] ; then
+    DOCKER_IMAGE="guzo/$COMMAND"
+else
+    DOCKER_IMAGE="$1"
+    shift
+fi
+
+if [[ "$1" == "" ]] ; then
+    OPTIONS=""
+else
+    OPTIONS=" $*"
+fi
+
+# Working directory is based on the command name
+targetDir="/usr/src/${COMMAND}"
+
+# If docker image has no architecture references, assume x86_64.
+# Otherwise, add a clause for each architecture supplied
+if [[ $(echo "$DOCKER_IMAGE" | grep "=" | wc -l) -eq 0 ]] ; then
+    read -r -d '' architectures <<-ENDOFARCH
+    x86_64)
+        dockerImage="$DOCKER_IMAGE"
+        ;;
+ENDOFARCH
+else
+    while read -d"," line ; do
+    key="$(echo $line | cut -d'=' -f1)"
+    val="$(echo $line | cut -d'=' -f2)"
+    read -r -d '' arch <<-ENDOFARCH
+    ${key})
+        dockerImage="$val"
+        ;;
+ENDOFARCH
+    read -r -d '' architectures <<-ENDOFCOMBINE
+    $architectures
+
+    $arch
+ENDOFCOMBINE
+    done <<< "$DOCKER_IMAGE,"
+fi
+
+cat <<-ENDOFSCRIPT
+#!/bin/bash
+
+machine=\$(uname -m)
+case "\$machine" in
+
+    ${architectures}
+
+    *)
+        echo "Unsupported architecture: \$machine"
+        exit 1
+        ;;
+esac
+
+if [[ "\$1" == "bash" ]] ; then
+    docker run -ti --name ${COMMAND} --hostname ${COMMAND} --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color"$OPTIONS -v \$PWD:$targetDir -w $targetDir \$dockerImage bash
+else
+    docker run -ti --name ${COMMAND} --hostname ${COMMAND} --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color"$OPTIONS -v \$PWD:$targetDir -w $targetDir \$dockerImage ${COMMAND} \$*
+fi
+docker rm ${COMMAND}
+ENDOFSCRIPT
