@@ -1,120 +1,285 @@
 #!/bin/bash
 
-if [[ `whoami` != "root" ]] ; then
-    echo "Must be run as root (try typing sudo $0)"
+SCRIPTNAME=$(basename $0)
+runningLocally=false
+
+__help() {
+
+    if [[ "$1" != "" ]] ; then
+        echo
+        echo "    ERROR"
+        echo
+        echo "    $*"
+    fi
+
+    cat <<-ENDOFHELP
+
+    Syntax: $SCRIPTNAME [ local ]
+
+    NOTES
+
+    This setup script generally needs to be run as root (to install some files
+    globally, e.g. to set the prompt), but can be run as 'local' if the word
+    'local' is supplied as a parameter.
+
+ENDOFHELP
+}
+
+
+__helpAndExit() {
+    __help $*
     exit 1
-fi
+}
 
-# Find out who we are
-if [[ -e /c/Users ]] ; then
-    WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
-else
-    WINDOWS_USER="nobody"
-fi
-echo "Assuming windows user: ${WINDOWS_USER}"
 
-# Variables
-DOCKER_SCRIPTS="`dirname $0`"
-STAGE_BIN="/tmp/stage-bin"
-BIN="/usr/local/bin"
-REGISTRY_NAME="registry-local"
-RESOURCES="${DOCKER_SCRIPTS}/resources"
-CACHE="${DOCKER_SCRIPTS}/cache"
-WINDOWS_HOME="/c/Users/${WINDOWS_USER}"
-VM_HOME="/home/docker"
+# Handle parameters
+while [ "$1" != "" ] ; do
 
-# Count the steps
-n=1
-max=`grep expr $0 | wc -l`  # This introduces one more 'expr' line than we need
-max=`expr ${max} - 2`       # So subtract from the total (+ the additional one this introduces)
+    case "$1" in
 
-echo "[${n}/${max}] Copying utility scripts" ; n=`expr $n + 1`
+        local)
+            runningLocally=true
+            ;;
 
-# First we create scripts for dockerised commands
-mkdir -p ${STAGE_BIN}
+        *)
+            __helpAndExit "Unrecognised option: $1"
+            ;;
+    esac
+    shift
+done
 
-# Anything from our base image
-echo "tree,drill," | while read -d ',' cmd ; do
-    ./generic-command $cmd guzo/base > ${STAGE_BIN}/$cmd
-done;
 
-# Commands which only have an x86 version
-echo "vim,perl,gcloud," | while read -d ',' cmd ; do
-    ./generic-command $cmd > ${STAGE_BIN}/$cmd
-done;
+__runningAsRoot() {
+    if [[ `whoami` != "root" ]] ; then
+        __helpAndExit "Either run as root (try typing sudo $SCRIPTNAME) or pass the 'local' parameter"
+    fi
+}
 
-# Commands which also have an ARM version
-echo "hugo,npm," | while read -d ',' cmd ; do
-    ./generic-command $cmd x86_64=guzo/$cmd,armv7l=guzo/$cmd:rpi > ${STAGE_BIN}/$cmd
-done;
 
-# Special cases
-./generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi > ${STAGE_BIN}/node
-./generic-command lein clojure -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
-./generic-command mvn maven > ${STAGE_BIN}/mvn
+__checkUser() {
+    if [[ $runningLocally == false ]] ; then
+        __runningAsRoot
+    fi
+}
 
-# Some docker utilities
-cp ${DOCKER_SCRIPTS}/docker-clean ${BIN}/docker-clean
-cp ${DOCKER_SCRIPTS}/docker-kill ${BIN}/docker-kill
-cp ${DOCKER_SCRIPTS}/docker-repo ${BIN}/docker-repo
+# If we're running on a VM on Windows, try to work out the windows user
+__identifyWindowsUser() {
+    if [[ -e /c/Users ]] ; then
+        WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
+    else
+        WINDOWS_USER="nobody"
+    fi
+}
 
-# Move commands from our staging area
-chmod +x ${STAGE_BIN}/*
-cp ${STAGE_BIN}/* ${BIN}
-rm ${STAGE_BIN}/*
-rmdir ${STAGE_BIN}
 
-# Alias in case a version of 'vim' is already earlier in the path
-if [[ -e ${BIN}/vimx ]] ; then
-    rm ${BIN}/vimx
-fi
-ln -s ${BIN}/vim ${BIN}/vimx
+__initCounter() {
+    n=1
+    max=`grep expr $0 | wc -l`
+    max=`expr ${max} - 1`
+}
 
-echo "[${n}/${max}] Adding bin to path" ; n=`expr $n + 1`
-echo "export PATH=$PATH:$BIN" > /etc/profile.d/set-path.sh
-chmod +x /etc/profile.d/set-path.sh
 
-echo "[${n}/${max}] Setting up custom prompt" ; n=`expr $n + 1`
-cp ${RESOURCES}/set-prompt.sh /etc/profile.d/set-prompt.sh
-chmod +x /etc/profile.d/set-prompt.sh
+__initVariables() {
+    DOCKER_SCRIPTS="`dirname $0`"
+    STAGE_BIN="/tmp/stage-bin"
+    LOCAL_BIN="${HOME}/.bin"
+    BIN="/usr/local/bin"
+    REGISTRY_NAME="registry-local"
+    RESOURCES="${DOCKER_SCRIPTS}/resources"
+    CACHE="${DOCKER_SCRIPTS}/cache"
+    WINDOWS_HOME="/c/Users/${WINDOWS_USER}"
+    VM_HOME="/home/docker"
+    __initCounter
+}
 
-echo "[${n}/${max}] Removing custom profile" ; n=`expr $n + 1`
-if [[ -e /home/docker/.profile ]] ; then
-    mv /home/docker/.profile /home/docker/.profile.bak
-fi
 
-echo "[${n}/${max}] Installing bash" ; n=`expr $n + 1`
-if [[ -e /usr/bin/tce && ! -e /usr/local/bin/bash ]] ; then
-    sudo -u docker tce-load -wi bash.tcz
-fi
+__step() {
+    echo "[${n}/${max}] $*"
+    n=`expr $n + 1`
+}
 
-echo "[${n}/${max}] Installing docker-compose" ; n=`expr $n + 1`
-if [[ ! -e ${CACHE} ]] ; then
-    mkdir ${CACHE}
-fi
-if [[ ! -e ${CACHE}/docker-compose ]] ; then
-    curl -Ls "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)" -o ${CACHE}/docker-compose
-fi
-cp ${CACHE}/docker-compose ${BIN}/docker-compose
-chmod +x ${BIN}/docker-compose
 
-echo "[${n}/${max}] Installing weaveworks kubernetes scope" ; n=`expr $n + 1`
-if [[ ! -e ${CACHE}/scope ]] ; then
-    curl -L git.io/scope -o ${CACHE}/scope
-fi
-cp ${CACHE}/scope ${BIN}/scope
-chmod +x ${BIN}/scope
+__setupUtilities() {
 
-echo "[${n}/${max}] Setting up links to common directories" ; n=`expr $n + 1`
-if [[ -e ${WINDOWS_HOME}/Documents && ! -e ${VM_HOME}/Documents ]] ; then
-    ln -s ${WINDOWS_HOME}/Documents ${VM_HOME}/Documents
-fi
-if [[ -e ${WINDOWS_HOME}/Downloads && ! -e ${VM_HOME}/Downloads ]] ; then
-    ln -s ${WINDOWS_HOME}/Downloads ${VM_HOME}/Downloads
-fi
-if [[ -e ${WINDOWS_HOME}/repositories && ! -e ${VM_HOME}/Repositories ]] ; then
-    ln -s ${WINDOWS_HOME}/repositories ${VM_HOME}/Repositories
-fi
+    # First we create scripts for dockerised commands
+    mkdir -p ${STAGE_BIN}
+
+    # Anything from our base image
+    echo "tree,drill," | while read -d ',' cmd ; do
+        ./generic-command $cmd guzo/base > ${STAGE_BIN}/$cmd
+    done;
+
+    # Commands which only have an x86 version
+    echo "vim,perl,gcloud," | while read -d ',' cmd ; do
+        ./generic-command $cmd > ${STAGE_BIN}/$cmd
+    done;
+
+    # Commands which also have an ARM version
+    echo "hugo,npm," | while read -d ',' cmd ; do
+        ./generic-command $cmd x86_64=guzo/$cmd,armv7l=guzo/$cmd:rpi > ${STAGE_BIN}/$cmd
+    done;
+
+    # Special cases
+    ./generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi > ${STAGE_BIN}/node
+    ./generic-command lein clojure -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
+    ./generic-command mvn maven > ${STAGE_BIN}/mvn
+
+    # Some docker utilities
+    cp ${DOCKER_SCRIPTS}/docker-clean ${STAGE_BIN}/docker-clean
+    cp ${DOCKER_SCRIPTS}/docker-kill ${STAGE_BIN}/docker-kill
+    cp ${DOCKER_SCRIPTS}/docker-repo ${STAGE_BIN}/docker-repo
+
+    # Move commands from our staging area
+    chmod +x ${STAGE_BIN}/*
+    if [[ $runningLocally == true ]] ; then
+        mkdir -p $LOCAL_BIN
+        cp ${STAGE_BIN}/* ${LOCAL_BIN}
+    else
+        cp ${STAGE_BIN}/* ${BIN}
+
+        # Alias in case a version of 'vim' is already earlier in the path
+        if [[ -e ${BIN}/vimx ]] ; then
+            rm ${BIN}/vimx
+        fi
+        ln -s ${BIN}/vim ${BIN}/vimx
+    fi
+    rm ${STAGE_BIN}/*
+    rmdir ${STAGE_BIN}
+}
+
+
+__setupGlobalPath() {
+    echo "export PATH=$PATH:$BIN" > /etc/profile.d/set-path.sh
+    chmod +x /etc/profile.d/set-path.sh
+}
+
+
+__setupLocalPath() {
+    if [[ ! -e $HOME/.profile || $(grep ${LOCAL_BIN} $HOME/.profile) == "" ]] ; then
+        echo "export PATH=$PATH:$LOCAL_BIN" >> $HOME/.profile
+    fi
+}
+
+
+__setupPath() {
+    if [[ $runningLocally == true ]] ; then
+        __setupLocalPath
+    else
+        __setupGlobalPath
+    fi
+}
+
+
+__setupGlobalPrompt() {
+    cp ${RESOURCES}/set-prompt.sh /etc/profile.d/set-prompt.sh
+    chmod +x /etc/profile.d/set-prompt.sh
+}
+
+
+
+__setupLocalPrompt() {
+    cp ${RESOURCES}/set-prompt.sh ${LOCAL_BIN}/.set-prompt.sh
+    if [[ ! -e $HOME/.profile || $(grep set-prompt.sh $HOME/.profile) == "" ]] ; then
+        echo "source ${LOCAL_BIN}/.set-prompt.sh" >> $HOME/.profile
+    fi
+}
+
+
+__setupPrompt() {
+    if [[ $runningLocally == true ]] ; then
+        __setupLocalPrompt
+    else
+        __setupGlobalPrompt
+    fi
+}
+
+
+__installBash() {
+    if [[ $runningLocally == false ]] ; then
+        if [[ -e /usr/bin/tce && ! -e /usr/local/bin/bash ]] ; then
+            sudo -u docker tce-load -wi bash.tcz
+        fi
+    fi
+}
+
+
+__installDockerCompose()  {
+    if [[ ! -e ${CACHE} ]] ; then
+        mkdir ${CACHE}
+    fi
+
+    if [[ ! -e ${CACHE}/docker-compose ]] ; then
+        curl -Ls "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)" -o ${CACHE}/docker-compose
+    fi
+
+    if [[ $runningLocally == true ]] ; then
+        cp ${CACHE}/docker-compose ${LOCAL_BIN}/docker-compose
+        chmod +x ${LOCAL_BIN}/docker-compose
+    else
+        cp ${CACHE}/docker-compose ${BIN}/docker-compose
+        chmod +x ${BIN}/docker-compose
+    fi
+}
+
+
+
+__installWeaveworks()  {
+    if [[ ! -e ${CACHE} ]] ; then
+        mkdir ${CACHE}
+    fi
+
+    if [[ ! -e ${CACHE}/scope ]] ; then
+        curl -L git.io/scope -o ${CACHE}/scope
+    fi
+
+    if [[ $runningLocally == true ]] ; then
+        cp ${CACHE}/scope ${LOCAL_BIN}/scope
+        chmod +x ${LOCAL_BIN}/scope
+    else
+        cp ${CACHE}/scope ${BIN}/scope
+        chmod +x ${BIN}/scope
+    fi
+}
+
+
+__setupWindowsLinks() {
+    if [[ "$WINDOWS_USER" != "nobody" ]] ; then
+        if [[ -e ${WINDOWS_HOME}/Documents && ! -e ${VM_HOME}/Documents ]] ; then
+            ln -s ${WINDOWS_HOME}/Documents ${VM_HOME}/Documents
+        fi
+        if [[ -e ${WINDOWS_HOME}/Downloads && ! -e ${VM_HOME}/Downloads ]] ; then
+            ln -s ${WINDOWS_HOME}/Downloads ${VM_HOME}/Downloads
+        fi
+        if [[ -e ${WINDOWS_HOME}/repositories && ! -e ${VM_HOME}/Repositories ]] ; then
+            ln -s ${WINDOWS_HOME}/repositories ${VM_HOME}/Repositories
+        fi
+    fi
+}
+
+__checkUser
+__identifyWindowsUser
+__initVariables
+
+__step "Copying utility scripts"
+__setupUtilities
+
+__step "Adding bin to path"
+__setupPath
+
+__step "Setting up custom prompt"
+__setupPrompt
+
+__step "Installing bash"
+__installBash
+
+__step "Installing docker-compose"
+__installDockerCompose
+
+__step "Installing weaveworks scope"
+__installWeaveworks
+
+__step "Setting up links to common directories"
+__setupWindowsLinks
 
 echo
 echo "Now type: exec bash -l"
