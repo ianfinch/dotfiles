@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Set variables
-REPO="localhost:5000"
+KUBE="http://localhost:30000/api/v1/service/kube-system"
+REPO="$(curl -s ${KUBE}/registry | grep clusterIP | cut -d'"' -f4)"
+echo "Repo: $REPO"
 
 # Derived variables
 SCRIPT_NAME=$(basename "$0")
@@ -10,9 +12,14 @@ SCRIPT_NAME=$(basename "$0")
 help() {
 
     cat >&2 <<-EOF
-    Syntax:
-        $SCRIPT_NAME list  - See what is in the docker repo
-        $SCRIPT_NAME push  - Put any local docker images into the repo
+
+    Syntax: $SCRIPT_NAME <option> [ <params> ]
+
+    Options:
+
+        * list          - See what is in the docker repo
+        * push <image>  - Put any local docker images into the repo
+
 EOF
 }
 
@@ -30,14 +37,24 @@ shift 1
 case "$COMMAND" in
 
     list)
-         curl -s http://${REPO}/v2/_catalog | sed -e 's/^[^[]*//' -e 's/","/\n/g' -e 's/^\["//' -e 's/"\].*//'
+         echo "Images:"
+         curl -s http://${REPO}/v2/_catalog | sed -e 's/^[^[]*//' -e 's/","/\n - /g' -e 's/^\["/ - /' -e 's/"\].*//'
         ;;
 
     push)
-        docker images | grep "^${REPO}" | sed 's/ .*//' | while read line ; do
-            docker push $line
-            echo
-        done
+        if [[ "$1" == "" ]] ; then
+            helpAndExit
+        fi
+
+        imageId=$(docker images -q $1)
+        if [[ "$imageId" == "" ]] ; then
+            echo "No image found: $1"
+            exit 1
+        fi
+
+        docker tag $imageId ${REPO}/$1
+        docker push ${REPO}/$1
+        docker rmi ${REPO}/$1
         ;;
 
     -h | --h | -help | --help | help)
