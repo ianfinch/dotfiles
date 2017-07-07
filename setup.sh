@@ -74,8 +74,7 @@ __identifyWindowsUser() {
 
 __initCounter() {
     n=1
-    max=`grep expr $0 | wc -l`
-    max=`expr ${max} - 1`
+    max=$(grep '^__step ' $0 | wc -l)
 }
 
 
