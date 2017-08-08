@@ -33,6 +33,13 @@ else
     OPTIONS=" $*"
 fi
 
+# For any 'guzo/*' images, set the user and home directory
+if [[ $(echo $DOCKER_IMAGE | grep '^guzo/') != "" ]] ; then
+    SETUSER=' --user ian -e "HOME=/home/ian"'
+else
+    SETUSER=""
+fi
+
 # Working directory is based on the command name
 targetDir="/usr/src/${COMMAND}"
 
@@ -76,9 +83,9 @@ case "\$machine" in
 esac
 
 if [[ "\$1" == "bash" ]] ; then
-    docker run -ti --name ${COMMAND} --hostname ${COMMAND} --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color"$OPTIONS -v \$PWD:$targetDir -w $targetDir \$dockerImage bash
+    docker run -ti --name ${COMMAND} --hostname ${COMMAND} -e "TERM=xterm-256color"$SETUSER$OPTIONS -v \$PWD:$targetDir -w $targetDir \$dockerImage bash
 else
-    docker run -ti --name ${COMMAND} --hostname ${COMMAND} --user ian -e "HOME=/home/ian" -e "TERM=xterm-256color"$OPTIONS -v \$PWD:$targetDir -w $targetDir \$dockerImage ${COMMAND} \$*
+    docker run -ti --name ${COMMAND} --hostname ${COMMAND} -e "TERM=xterm-256color"$SETUSER$OPTIONS -v \$PWD:$targetDir -w $targetDir \$dockerImage ${COMMAND} \$*
 fi
 docker rm ${COMMAND}
 ENDOFSCRIPT

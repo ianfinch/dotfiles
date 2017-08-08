@@ -105,23 +105,25 @@ __setupUtilities() {
 
     # Anything from our base image
     echo "tree,drill," | while read -d ',' cmd ; do
-        ./generic-command $cmd guzo/base > ${STAGE_BIN}/$cmd
+        ${DOCKER_SCRIPTS}/generic-command $cmd guzo/base > ${STAGE_BIN}/$cmd
     done;
 
     # Commands which only have an x86 version
     echo "vim,perl,gcloud," | while read -d ',' cmd ; do
-        ./generic-command $cmd > ${STAGE_BIN}/$cmd
+        ${DOCKER_SCRIPTS}/generic-command $cmd > ${STAGE_BIN}/$cmd
     done;
 
     # Commands which also have an ARM version
-    echo "hugo,npm," | while read -d ',' cmd ; do
-        ./generic-command $cmd x86_64=guzo/$cmd,armv7l=guzo/$cmd:rpi > ${STAGE_BIN}/$cmd
+    echo "npm," | while read -d ',' cmd ; do
+        ${DOCKER_SCRIPTS}/generic-command $cmd x86_64=guzo/$cmd,armv7l=guzo/$cmd:rpi > ${STAGE_BIN}/$cmd
     done;
 
     # Special cases
-    ./generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi > ${STAGE_BIN}/node
-    ./generic-command lein clojure -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
-    ./generic-command mvn maven > ${STAGE_BIN}/mvn
+    ${DOCKER_SCRIPTS}/generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi > ${STAGE_BIN}/node
+    ${DOCKER_SCRIPTS}/generic-command lein clojure -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
+    ${DOCKER_SCRIPTS}/generic-command java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
+    ${DOCKER_SCRIPTS}/generic-command mvn maven > ${STAGE_BIN}/mvn
+    ${DOCKER_SCRIPTS}/generic-command hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8080 > ${STAGE_BIN}/hugo
 
     # Some docker utilities
     cp ${DOCKER_SCRIPTS}/docker-clean ${STAGE_BIN}/docker-clean
@@ -202,10 +204,15 @@ __installBash() {
 }
 
 
-__installDockerCompose()  {
+__createCacheDir () {
     if [[ ! -e ${CACHE} ]] ; then
         mkdir ${CACHE}
     fi
+}
+
+
+__installDockerCompose()  {
+    __createCacheDir
 
     if [[ ! -e ${CACHE}/docker-compose ]] ; then
         curl -Ls "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)" -o ${CACHE}/docker-compose
@@ -221,11 +228,25 @@ __installDockerCompose()  {
 }
 
 
+__installAwsCli () {
+    __createCacheDir
+
+    if [[ ! -e ${CACHE}/aws ]] ; then
+        curl -Ls "https://raw.githubusercontent.com/mesosphere/aws-cli/master/aws.sh" -o ${CACHE}/aws
+    fi
+
+    if [[ $runningLocally == true ]] ; then
+        cp ${CACHE}/aws ${LOCAL_BIN}/aws
+        chmod +x ${LOCAL_BIN}/aws
+    else
+        cp ${CACHE}/aws ${BIN}/aws
+        chmod +x ${BIN}/aws
+    fi
+}
+
 
 __installWeaveworks()  {
-    if [[ ! -e ${CACHE} ]] ; then
-        mkdir ${CACHE}
-    fi
+    __createCacheDir
 
     if [[ ! -e ${CACHE}/scope ]] ; then
         curl -L git.io/scope -o ${CACHE}/scope
@@ -273,6 +294,9 @@ __installBash
 
 __step "Installing docker-compose"
 __installDockerCompose
+
+__step "Installing AWS cli client"
+__installAwsCli
 
 __step "Installing weaveworks scope"
 __installWeaveworks

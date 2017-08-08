@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# This is how we expect the Graphviz server to self-identify
+graphvizServerString="DotGraphics/1.1"
+
+# For now, assume we're on local server
+server="127.0.0.1"
+
+# Check a filename has been supplied
+if [[ "$2" == "" ]] ; then
+    echo "Syntax: dot <dot file> <output file>"
+    exit 1
+fi
+
+# Check the file exists
+if [[ ! -e "$1" ]] ; then
+    echo "File does not exist: $1"
+    exit 1
+fi
+
+# Check what sort of output type we are after
+extn=$(echo $2 | cut -d"." -f2)
+case "$extn" in
+
+    svg | pdf)
+        ;;
+
+    png)
+        extn=""
+        ;;
+
+    *)
+        echo "Unhandled output file type: $extn"
+        exit 1
+        ;;
+esac
+
+# Check whether we have a graphviz container running we can use
+existingGraphviz=$(docker ps -q --filter name=graphviz)
+if [[ "$existingGraphviz" != "" ]] ; then
+    graphvizContainer="$existingGraphviz"
+else
+    echo "Starting new Graphviz Server TBD"
+    exit 0
+fi
+
+# Which port is the server listening on?
+port=$(docker inspect $graphvizContainer | grep HostPort | cut -d":" -f2 | sed 's/[^0-9]//g' | head -1)
+
+# Check we have our expected server
+serverString=$(curl --silent --dump - http://${server}:${port} | grep '^Server:' | sed "s/[\r\n]//g" | cut -d" " -f2)
+if [[ "$serverString" != "$graphvizServerString" ]] ; then
+    echo "Unexpected server string: $serverString"
+    exit 1
+fi
+
+# Generate our output
+curl -X POST --silent --data @$1 --output $2 http://${server}:${port}/${extn}
