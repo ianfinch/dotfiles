@@ -109,7 +109,7 @@ __setupUtilities() {
     done;
 
     # Commands which only have an x86 version
-    echo "vim,perl,gcloud," | while read -d ',' cmd ; do
+    echo "vim,perl,gcloud,vue," | while read -d ',' cmd ; do
         ${DOCKER_SCRIPTS}/generic-command $cmd > ${STAGE_BIN}/$cmd
     done;
 
@@ -119,11 +119,14 @@ __setupUtilities() {
     done;
 
     # Special cases
-    ${DOCKER_SCRIPTS}/generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi > ${STAGE_BIN}/node
-    ${DOCKER_SCRIPTS}/generic-command lein clojure -v /run/lein:/root/.lein -v /run/m2:/root/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
+    ${DOCKER_SCRIPTS}/generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi -p 3000:3000 > ${STAGE_BIN}/node
+    ${DOCKER_SCRIPTS}/generic-command lein guzo/leinjs -v /run/lein:/home/ian/.lein -v /run/m2:/home/ian/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
     ${DOCKER_SCRIPTS}/generic-command java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
     ${DOCKER_SCRIPTS}/generic-command mvn maven > ${STAGE_BIN}/mvn
-    ${DOCKER_SCRIPTS}/generic-command hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8080 > ${STAGE_BIN}/hugo
+    ${DOCKER_SCRIPTS}/generic-command hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8888 > ${STAGE_BIN}/hugo
+
+    # Custom scripts
+    cp ${DOCKER_SCRIPTS}/dot ${STAGE_BIN}/dot
 
     # Some docker utilities
     cp ${DOCKER_SCRIPTS}/docker-clean ${STAGE_BIN}/docker-clean
