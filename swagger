@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Definitions
+host=192.168.99.100
+port=3001
+
+# Check params
+if [[ "$1" == "" ]] ; then
+    echo "Syntax: swagger <directory>"
+    exit 1
+fi
+
+# Find Swagger file to start from
+file=$(ls ${1} | head)
+if [[ "$file" == "" ]] ; then
+    echo "Supplied Swagger directory is empty"
+    exit 1
+fi
+
+# Start server
+echo "Starting swagger server on http://${host}:${port}"
+docker run -ti -p ${port}:8080 -v ${1}:/usr/share/nginx/html/specs -e API_URL=http://${host}:${port}/specs/$file swaggerapi/swagger-ui

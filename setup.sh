@@ -124,9 +124,11 @@ __setupUtilities() {
     ${DOCKER_SCRIPTS}/generic-command java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
     ${DOCKER_SCRIPTS}/generic-command mvn maven > ${STAGE_BIN}/mvn
     ${DOCKER_SCRIPTS}/generic-command hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8888 > ${STAGE_BIN}/hugo
+    ${DOCKER_SCRIPTS}/generic-command npm guzo/npm -p 3000:3000 -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
 
     # Custom scripts
     cp ${DOCKER_SCRIPTS}/dot ${STAGE_BIN}/dot
+    cp ${DOCKER_SCRIPTS}/swagger ${STAGE_BIN}/swagger
 
     # Some docker utilities
     cp ${DOCKER_SCRIPTS}/docker-clean ${STAGE_BIN}/docker-clean
