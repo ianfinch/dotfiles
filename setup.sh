@@ -66,8 +66,11 @@ __checkUser() {
 __identifyWindowsUser() {
     if [[ -e /c/Users ]] ; then
         WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
+    	WINDOWS_HOME="/c/Users/${WINDOWS_USER}"
+    elif [[ -e /Folders ]] ; then
+    	WINDOWS_HOME="/Folders"
     else
-        WINDOWS_USER="nobody"
+        WINDOWS_HOME="unknown"
     fi
 }
 
@@ -86,7 +89,6 @@ __initVariables() {
     REGISTRY_NAME="registry-local"
     RESOURCES="${DOCKER_SCRIPTS}/resources"
     CACHE="${DOCKER_SCRIPTS}/cache"
-    WINDOWS_HOME="/c/Users/${WINDOWS_USER}"
     VM_HOME="/home/docker"
     __initCounter
 }
@@ -109,7 +111,7 @@ __setupUtilities() {
     done;
 
     # Commands which only have an x86 version
-    echo "vim,perl,gcloud,vue," | while read -d ',' cmd ; do
+    echo "vim,perl,gcloud,vue,tig,zip," | while read -d ',' cmd ; do
         ${DOCKER_SCRIPTS}/generic-command $cmd > ${STAGE_BIN}/$cmd
     done;
 
@@ -120,15 +122,23 @@ __setupUtilities() {
 
     # Special cases
     ${DOCKER_SCRIPTS}/generic-command node x86_64=guzo/npm,armv7l=guzo/npm:rpi -p 3000:3000 > ${STAGE_BIN}/node
+    ${DOCKER_SCRIPTS}/generic-command go golang:alpine > ${STAGE_BIN}/go
+    ${DOCKER_SCRIPTS}/generic-command ngrok guzo/ngrok -p 4040:4040 > ${STAGE_BIN}/ngrok
     ${DOCKER_SCRIPTS}/generic-command lein guzo/leinjs -v /run/lein:/home/ian/.lein -v /run/m2:/home/ian/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
     ${DOCKER_SCRIPTS}/generic-command java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
     ${DOCKER_SCRIPTS}/generic-command mvn maven > ${STAGE_BIN}/mvn
     ${DOCKER_SCRIPTS}/generic-command hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8888 > ${STAGE_BIN}/hugo
     ${DOCKER_SCRIPTS}/generic-command npm guzo/npm -p 3000:3000 -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
+    ${DOCKER_SCRIPTS}/generic-command task guzo/task -v ${VM_HOME}/task-data:/usr/src/data > ${STAGE_BIN}/task
+    ${DOCKER_SCRIPTS}/generic-command http guzo/httpie > ${STAGE_BIN}/http
+    ${DOCKER_SCRIPTS}/generic-command gpg guzo/gpg -v /run/gnupg:/home/ian/.gnupg -v /dev/urandom:/dev/random > ${STAGE_BIN}/gpg
 
     # Custom scripts
-    cp ${DOCKER_SCRIPTS}/dot ${STAGE_BIN}/dot
+    cp ${DOCKER_SCRIPTS}/dot-server ${STAGE_BIN}/dot
     cp ${DOCKER_SCRIPTS}/swagger ${STAGE_BIN}/swagger
+
+    # Temporary commands
+    echo "docker run -ti -v ${WINDOWS_HOME}/Downloads/iplayer:/opt/iplayer guzo/iplayer get_iplayer --output /opt/iplayer/output --profile-dir /opt/iplayer/profile" '$*' > ${STAGE_BIN}/iplayer
 
     # Some docker utilities
     cp ${DOCKER_SCRIPTS}/docker-clean ${STAGE_BIN}/docker-clean
@@ -141,6 +151,7 @@ __setupUtilities() {
         mkdir -p $LOCAL_BIN
         cp ${STAGE_BIN}/* ${LOCAL_BIN}
     else
+        mkdir -p $BIN
         cp ${STAGE_BIN}/* ${BIN}
 
         # Alias in case a version of 'vim' is already earlier in the path
@@ -268,7 +279,7 @@ __installWeaveworks()  {
 
 
 __setupWindowsLinks() {
-    if [[ "$WINDOWS_USER" != "nobody" ]] ; then
+    if [[ "$WINDOWS_HOME" != "unknown" ]] ; then
         if [[ -e ${WINDOWS_HOME}/Documents && ! -e ${VM_HOME}/Documents ]] ; then
             ln -s ${WINDOWS_HOME}/Documents ${VM_HOME}/Documents
         fi
@@ -277,6 +288,9 @@ __setupWindowsLinks() {
         fi
         if [[ -e ${WINDOWS_HOME}/repositories && ! -e ${VM_HOME}/Repositories ]] ; then
             ln -s ${WINDOWS_HOME}/repositories ${VM_HOME}/Repositories
+        fi
+        if [[ -e ${WINDOWS_HOME}/repositories/task-data && ! -e ${VM_HOME}/task-data ]] ; then
+            ln -s ${WINDOWS_HOME}/repositories/task-data ${VM_HOME}/task-data
         fi
     fi
 }

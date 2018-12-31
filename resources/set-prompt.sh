@@ -1,4 +1,4 @@
-export TERM=xterm-256color
+export TERM=xterm-color
 
 if [[ `whoami` == "root" ]] ; then
    prompt="#"

@@ -1,0 +1,7 @@
+# Uses guzo/iplayer image
+docker rm iplayer
+
+docker run -ti --name iplayer                                                  \
+           -v/c/Users/ian.finch/Downloads/iplayer:/opt/iplayer guzo/iplayer    \
+       get-iplayer --output /opt/iplayer/output                                \
+                   --profile-dir /opt/iplayer/profile $*
