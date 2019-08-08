@@ -1,0 +1,27 @@
+#!/bin/bash
+
+requiredImages=("guzo/leinjs" "guzo/vim")
+declare -A imageList
+
+commandOutput=()
+mapfile -t commandOutput < <(docker images | tail +2)
+for imgKey in ${!commandOutput[@]}; do
+  img="${commandOutput[$imgKey]}"
+  imageList["$(echo $img | cut -d' ' -f1)"]="+ $img"
+done
+
+for img in ${requiredImages[@]}; do
+  if [[ $(docker images -q "$img") != "" ]] ; then
+      imageList["$img"]="$(docker images $img | tail +2 | sed 's/^/  /')"
+  else
+      imageList["$img"]="- $(printf %-20s $img)--                  --                  --                  --"
+  fi
+done
+
+echo "  -------------------------------------------------------------------------------------"
+echo "  REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE"
+echo "  -------------------------------------------------------------------------------------"
+
+for img in ${!imageList[@]}; do
+  echo "${imageList[$img]}"
+done
