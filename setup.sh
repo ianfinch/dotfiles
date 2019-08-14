@@ -123,7 +123,6 @@ __setupUtilities() {
 
     # Special cases
     "$GENERIC_COMMAND" node x86_64=guzo/npm,armv7l=guzo/npm:rpi -p 3000:3000 > ${STAGE_BIN}/node
-    "$GENERIC_COMMAND" go golang:alpine -e '"GOOS=$GOOS"' -e '"GOARCH=$GOARCH"' -p 3000:3000 > ${STAGE_BIN}/go
     "$GENERIC_COMMAND" tinygo tinygo/tinygo > ${STAGE_BIN}/tinygo
     "$GENERIC_COMMAND" ngrok guzo/ngrok -p 4040:4040 > ${STAGE_BIN}/ngrok
     "$GENERIC_COMMAND" lein guzo/leinjs -v /home/docker/.lein:/home/ian/.lein -v /run/m2:/home/ian/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
@@ -147,6 +146,9 @@ __setupUtilities() {
     cp "${DOCKER_SCRIPTS}/docker-clean" ${STAGE_BIN}/docker-clean
     cp "${DOCKER_SCRIPTS}/docker-kill" ${STAGE_BIN}/docker-kill
     cp "${DOCKER_SCRIPTS}/docker-repo" ${STAGE_BIN}/docker-repo
+
+    # Other more complex commands
+    cp "${DOCKER_SCRIPTS}/go" ${STAGE_BIN}/go
 
     # Move commands from our staging area
     chmod +x ${STAGE_BIN}/*
