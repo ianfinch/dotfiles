@@ -62,18 +62,6 @@ __checkUser() {
     fi
 }
 
-# If we're running on a VM on Windows, try to work out the windows user
-__identifyWindowsUser() {
-    if [[ -e /c/Users ]] ; then
-        WINDOWS_USER="`ls -d /c/Users/[a-z]*/ | cut -d'/' -f4`"
-    	WINDOWS_HOME="/c/Users/${WINDOWS_USER}"
-    elif [[ -e /Folders ]] ; then
-    	WINDOWS_HOME="/Folders"
-    else
-        WINDOWS_HOME="unknown"
-    fi
-}
-
 
 __initCounter() {
     n=1
@@ -116,20 +104,15 @@ __setupUtilities() {
         "$GENERIC_COMMAND" $cmd > ${STAGE_BIN}/$cmd
     done;
 
-    # Commands which also have an ARM version
-    echo "npm," | while read -d ',' cmd ; do
-        "$GENERIC_COMMAND" $cmd x86_64=guzo/$cmd,armv7l=guzo/$cmd:rpi > ${STAGE_BIN}/$cmd
-    done;
-
-    # Special cases
-    "$GENERIC_COMMAND" node x86_64=guzo/npm,armv7l=guzo/npm:rpi -p 3000:3000 > ${STAGE_BIN}/node
+    # Generic commands which require more configuration
+    "$GENERIC_COMMAND" node x86_64=guzo/npm,armv7l=guzo/npm:armv7l -p 3000:3000 > ${STAGE_BIN}/node
     "$GENERIC_COMMAND" tinygo tinygo/tinygo > ${STAGE_BIN}/tinygo
     "$GENERIC_COMMAND" ngrok guzo/ngrok -p 4040:4040 > ${STAGE_BIN}/ngrok
     "$GENERIC_COMMAND" lein guzo/leinjs -v /home/docker/.lein:/home/ian/.lein -v /run/m2:/home/ian/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
     "$GENERIC_COMMAND" java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
     "$GENERIC_COMMAND" mvn maven > ${STAGE_BIN}/mvn
-    "$GENERIC_COMMAND" hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8888 > ${STAGE_BIN}/hugo
-    "$GENERIC_COMMAND" npm guzo/npm -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
+    "$GENERIC_COMMAND" hugo x86_64=guzo/hugo,armv7l=guzo/hugo:armv7l -p 8888:8888 > ${STAGE_BIN}/hugo
+    "$GENERIC_COMMAND" npm x86_64=guzo/npm,armv7l=guzo/npm:armv7l -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
     "$GENERIC_COMMAND" task guzo/task -v ${VM_HOME}/task-data:/usr/src/data > ${STAGE_BIN}/task
     "$GENERIC_COMMAND" http guzo/httpie > ${STAGE_BIN}/http
     "$GENERIC_COMMAND" gpg guzo/gpg -v /run/gnupg:/home/ian/.gnupg -v /dev/urandom:/dev/random > ${STAGE_BIN}/gpg
@@ -140,7 +123,7 @@ __setupUtilities() {
     cp "${DOCKER_SCRIPTS}/swagger" ${STAGE_BIN}/swagger
 
     # Temporary commands
-    echo "docker run -ti -v ${WINDOWS_HOME}/Downloads/iplayer:/opt/iplayer guzo/iplayer get_iplayer --output /opt/iplayer/output --profile-dir /opt/iplayer/profile" '$*' > ${STAGE_BIN}/iplayer
+#    echo "docker run -ti -v ${HOME}/Downloads/iplayer:/opt/iplayer guzo/iplayer get_iplayer --output /opt/iplayer/output --profile-dir /opt/iplayer/profile" '$*' > ${STAGE_BIN}/iplayer
 
     # Some docker utilities
     cp "${DOCKER_SCRIPTS}/docker-setup" ${STAGE_BIN}/docker-setup
@@ -254,42 +237,7 @@ __installDockerCompose()  {
 }
 
 
-__installAwsCli () {
-    __createCacheDir
-
-    if [[ ! -e "${CACHE}/aws" ]] ; then
-        curl -Ls "https://raw.githubusercontent.com/mesosphere/aws-cli/master/aws.sh" -o "${CACHE}/aws"
-    fi
-
-    if [[ $runningLocally == true ]] ; then
-        cp "${CACHE}/aws" ${LOCAL_BIN}/aws
-        chmod +x ${LOCAL_BIN}/aws
-    else
-        cp "${CACHE}/aws" ${BIN}/aws
-        chmod +x ${BIN}/aws
-    fi
-}
-
-
-__installWeaveworks()  {
-    __createCacheDir
-
-    if [[ ! -e "${CACHE}/scope" ]] ; then
-        curl -L git.io/scope -o "${CACHE}/scope"
-    fi
-
-    if [[ $runningLocally == true ]] ; then
-        cp "${CACHE}/scope" ${LOCAL_BIN}/scope
-        chmod +x ${LOCAL_BIN}/scope
-    else
-        cp "${CACHE}/scope" ${BIN}/scope
-        chmod +x ${BIN}/scope
-    fi
-}
-
-
 __checkUser
-__identifyWindowsUser
 __initVariables
 
 __step "Copying utility scripts"
@@ -306,12 +254,6 @@ __installBash
 
 __step "Installing docker-compose"
 __installDockerCompose
-
-__step "Installing AWS cli client"
-__installAwsCli
-
-__step "Installing weaveworks scope"
-__installWeaveworks
 
 echo
 echo "Now type: exec bash -l"
