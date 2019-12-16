@@ -2,6 +2,7 @@
 
 COMMAND=$(basename $0)
 machine=$(uname -m)
+wd=/usr/local/src
 
 case "$machine" in
 
@@ -15,15 +16,20 @@ case "$machine" in
         ;;
 esac
 
+# Copy across any environmental variables starting with 'GO'
 envVars=$(env | while read envVar ; do
     if [[ "$(echo $envVar | cut -c1-2)" == "GO" ]] ; then
-        echo -n "-e $envVar "
+        echo -n " _e $envVar"
     fi
 done)
 
+# Any local paths need to get mapped to our target working directory
+envVars=$(echo $envVars | sed -e "s|$PWD|$wd|g" -e 's/_e/-e/g')
+
+# Start the docker container
 if [[ "$1" == "bash" ]] ; then
-    docker run -ti --name go --hostname go -e "TERM=xterm-256color"$envVars -v "$PWD":/usr/local/src -w /usr/local/src $dockerImage sh
+    docker run -ti --name go --hostname go -e "TERM=xterm-256color" $envVars -v "$PWD":$wd -w $wd $dockerImage sh
 else
-    docker run -ti --name go --hostname go -e "TERM=xterm-256color"$envVars -v "$PWD":/usr/local/src -w /usr/local/src -p 3000:3000 $dockerImage $COMMAND $*
+    docker run -ti --name go --hostname go -e "TERM=xterm-256color" $envVars -v "$PWD":$wd -w $wd -p 3000:3000 $dockerImage $COMMAND $*
 fi
 docker rm go

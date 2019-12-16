@@ -129,10 +129,11 @@ __setupUtilities() {
     "$GENERIC_COMMAND" java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
     "$GENERIC_COMMAND" mvn maven > ${STAGE_BIN}/mvn
     "$GENERIC_COMMAND" hugo x86_64=guzo/hugo,armv7l=guzo/hugo:rpi -p 8888:8888 > ${STAGE_BIN}/hugo
-    "$GENERIC_COMMAND" npm guzo/npm -p 3000:3000 -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
+    "$GENERIC_COMMAND" npm guzo/npm -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
     "$GENERIC_COMMAND" task guzo/task -v ${VM_HOME}/task-data:/usr/src/data > ${STAGE_BIN}/task
     "$GENERIC_COMMAND" http guzo/httpie > ${STAGE_BIN}/http
     "$GENERIC_COMMAND" gpg guzo/gpg -v /run/gnupg:/home/ian/.gnupg -v /dev/urandom:/dev/random > ${STAGE_BIN}/gpg
+    "$GENERIC_COMMAND" grip guzo/grip -p 8080:8080 > ${STAGE_BIN}/grip
 
     # Custom scripts
     cp "${DOCKER_SCRIPTS}/dot-server" ${STAGE_BIN}/dot
