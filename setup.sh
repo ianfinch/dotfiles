@@ -106,7 +106,6 @@ __setupUtilities() {
 
     # Generic commands which require more configuration
     "$GENERIC_COMMAND" node x86_64=guzo/npm,armv7l=guzo/npm:armv7l -p 3000:3000 > ${STAGE_BIN}/node
-    "$GENERIC_COMMAND" tinygo tinygo/tinygo > ${STAGE_BIN}/tinygo
     "$GENERIC_COMMAND" ngrok guzo/ngrok -p 4040:4040 > ${STAGE_BIN}/ngrok
     "$GENERIC_COMMAND" lein guzo/leinjs -v /home/docker/.lein:/home/ian/.lein -v /run/m2:/home/ian/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
     "$GENERIC_COMMAND" java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
@@ -133,6 +132,7 @@ __setupUtilities() {
 
     # Other more complex commands
     cp "${DOCKER_SCRIPTS}/go" ${STAGE_BIN}/go
+    cp "${DOCKER_SCRIPTS}/go" ${STAGE_BIN}/tinygo
 
     # Move commands from our staging area
     chmod +x ${STAGE_BIN}/*
