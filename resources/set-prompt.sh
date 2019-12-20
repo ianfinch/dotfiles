@@ -12,20 +12,23 @@ else
    swatch=(61 33 37 235)
 fi
 
-chevron=$'\xee\x82\xb0'
+chevronChar=$'\xee\x82\xb0'
 
 setColour() {
     echo "\[\e[48;5;${swatch[$1]};38;5;230m\]"
 }
 
 chevron() {
-    chevronChar=$'\xee\x82\xb0'
-    echo "\[\e[48;5;${swatch[$2]};38;5;${swatch[$1]}m\]$chevronChar"
+    if [[ "$2" == "" ]] ; then
+        echo "\[\e[m\e[38;5;${swatch[$1]}m\]$chevronChar"
+    else
+        echo "\[\e[48;5;${swatch[$2]};38;5;${swatch[$1]}m\]$chevronChar"
+    fi
 }
 
 machine="$(setColour 0)\h$(chevron 0 1)"
 username="$(setColour 1)\u$(chevron 1 2)"
-directory="$(setColour 2)\w$(chevron 2 3)"
+directory="$(setColour 2)\w$(chevron 2)"
 
 setTitle='\e]0;\u@\h:\W\a'
 setPrompt="${machine}${username}${directory}\[\e[m\] "
