@@ -4,10 +4,14 @@ COMMAND=$(basename $0)
 machine=$(uname -m)
 wd=/usr/local/src
 
-case "$machine" in
+case "${COMMAND}_$machine" in
 
-    x86_64)
+    go_x86_64)
         dockerImage="golang:alpine"
+        ;;
+
+    tinygo_x86_64)
+        dockerImage="tinygo/tinygo"
         ;;
 
     *)
