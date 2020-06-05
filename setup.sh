@@ -95,7 +95,7 @@ __setupUtilities() {
     mkdir -p ${STAGE_BIN}
 
     # Anything from our base image
-    echo "tree,drill," | while read -d ',' cmd ; do
+    echo "tree,drill,base64," | while read -d ',' cmd ; do
         "$GENERIC_COMMAND" $cmd guzo/base > ${STAGE_BIN}/$cmd
     done;
 
@@ -105,17 +105,18 @@ __setupUtilities() {
     done;
 
     # Generic commands which require more configuration
-    "$GENERIC_COMMAND" node x86_64=guzo/npm,armv7l=guzo/npm:armv7l -p 3000:3000 > ${STAGE_BIN}/node
+    "$GENERIC_COMMAND" node x86_64=guzo/npm,armv7l=guzo/npm:armv7l -p 3000:3000 -p 4200:4200 > ${STAGE_BIN}/node
     "$GENERIC_COMMAND" ngrok guzo/ngrok -p 4040:4040 > ${STAGE_BIN}/ngrok
     "$GENERIC_COMMAND" lein guzo/leinjs -v /home/docker/.lein:/home/ian/.lein -v /run/m2:/home/ian/.m2 -p 3000:3000 > ${STAGE_BIN}/lein
     "$GENERIC_COMMAND" java java:alpine -p 3000:3000 > ${STAGE_BIN}/java
     "$GENERIC_COMMAND" mvn maven > ${STAGE_BIN}/mvn
     "$GENERIC_COMMAND" hugo x86_64=guzo/hugo,armv7l=guzo/hugo:armv7l -p 8888:8888 > ${STAGE_BIN}/hugo
-    "$GENERIC_COMMAND" npm x86_64=guzo/npm,armv7l=guzo/npm:armv7l -v /run/node_dependencies:/usr/src/dependencies > ${STAGE_BIN}/npm
+    "$GENERIC_COMMAND" npm x86_64=guzo/npm,armv7l=guzo/npm:armv7l -v /run/node_dependencies:/usr/src/dependencies -p 3000:3000 -p 4200:4200 > ${STAGE_BIN}/npm
     "$GENERIC_COMMAND" task guzo/task -v ${VM_HOME}/task-data:/usr/src/data > ${STAGE_BIN}/task
     "$GENERIC_COMMAND" http guzo/httpie > ${STAGE_BIN}/http
     "$GENERIC_COMMAND" gpg guzo/gpg -v /run/gnupg:/home/ian/.gnupg -v /dev/urandom:/dev/random > ${STAGE_BIN}/gpg
     "$GENERIC_COMMAND" grip guzo/grip -p 8080:8080 > ${STAGE_BIN}/grip
+    "$GENERIC_COMMAND" magick guzo/imagemagick > ${STAGE_BIN}/magick
 
     # Custom scripts
     cp "${DOCKER_SCRIPTS}/dot-server" ${STAGE_BIN}/dot
@@ -133,6 +134,7 @@ __setupUtilities() {
     # Other more complex commands
     cp "${DOCKER_SCRIPTS}/go" ${STAGE_BIN}/go
     cp "${DOCKER_SCRIPTS}/go" ${STAGE_BIN}/tinygo
+    cp "${DOCKER_SCRIPTS}/sls" ${STAGE_BIN}/sls
 
     # Move commands from our staging area
     chmod +x ${STAGE_BIN}/*
