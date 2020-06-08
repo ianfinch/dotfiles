@@ -100,7 +100,7 @@ __setupUtilities() {
     done;
 
     # Commands which only have an x86 version
-    echo "vim,perl,gcloud,vue,tig,zip," | while read -d ',' cmd ; do
+    echo "perl,gcloud,vue,tig,zip," | while read -d ',' cmd ; do
         "$GENERIC_COMMAND" $cmd > ${STAGE_BIN}/$cmd
     done;
 
@@ -117,6 +117,7 @@ __setupUtilities() {
     "$GENERIC_COMMAND" gpg guzo/gpg -v /run/gnupg:/home/ian/.gnupg -v /dev/urandom:/dev/random > ${STAGE_BIN}/gpg
     "$GENERIC_COMMAND" grip guzo/grip -p 8080:8080 > ${STAGE_BIN}/grip
     "$GENERIC_COMMAND" magick guzo/imagemagick > ${STAGE_BIN}/magick
+    "$GENERIC_COMMAND" vim x86_64=guzo/vim,armv7l=guzo/vim:armv7l > ${STAGE_BIN}/vim
 
     # Custom scripts
     cp "${DOCKER_SCRIPTS}/dot-server" ${STAGE_BIN}/dot
