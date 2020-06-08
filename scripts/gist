@@ -1,0 +1,117 @@
+#!/bin/bash
+#
+# Look for information I've stored in my gists
+#
+
+gists=https://gist.github.com/ianfinch
+cache=$HOME/.gists
+dots="................................................................................"
+SCRIPT_NAME=$(basename "$0")
+
+__help() {
+    cat >&2 <<-ENDOFHELP
+Syntax: $SCRIPT_NAME [<gist slug>]
+ENDOFHELP
+}
+
+
+__helpAndExit() {
+    __help
+    exit 1
+}
+
+
+__cacheGists() {
+
+    echo -n "" > $cache
+
+    inTitle=0
+    title=""
+    url=""
+    slug=""
+
+    curl -s $gists | while read line ; do
+
+        if $( echo "$line" | grep -q 'class="f6' ) ; then
+            inTitle=1
+        elif [[ $inTitle -eq 1 ]] ; then
+            title="$line"
+            inTitle=0
+        fi
+
+        if $( echo "$line" | grep -q 'class="link-overlay"' ) ; then
+            url=$( echo $line | cut -d'"' -f4 )
+        fi
+
+        if $( echo "$line" | grep -q 'class="link"' ) ; then
+            slug=$( echo $line | cut -c33-1000 | cut -d'<' -f1 )
+            echo "${title}	${slug}	${url}" >> $cache
+            title=""
+            url=""
+            slug=""
+        fi
+    done
+}
+
+
+__listGists() {
+
+    if [[ ! -e $cache ]] ; then
+        __cacheGists
+    fi
+
+    cat $cache | sort | while read line ; do
+        title=$( echo "$line" | cut -d"	" -f1 )
+        slug=$( echo "$line" | cut -d"	" -f2 )
+        spacer=$( echo $dots | cut -c$( expr ${#title} + ${#slug} + 2 )-$( expr ${#dots} - 1 ))
+        echo "$title $spacer $slug"
+    done
+}
+
+
+__getMatchingSlugs() {
+
+    if [[ ! -e $cache ]] ; then
+        __cacheGists
+    fi
+
+    while [[ $# -gt 0 ]] ; do
+        target=$1
+        shift
+
+        cat $cache | sort | while read line ; do
+            slug=$( echo "$line" | cut -d"	" -f2 )
+            if $( echo $slug | grep -q $target ) ; then
+                echo $slug
+            fi
+        done
+    done
+}
+
+
+__displayGist() {
+    target=$1
+
+    cat $cache | sort | while read line ; do
+        slug=$( echo "$line" | cut -d"	" -f2 )
+        if $( echo $slug | grep -q $target ) ; then
+            url=$( echo "$line" | cut -d"	" -f3 )
+            curl -L $url/raw
+            echo
+        fi
+    done
+}
+
+
+if [[ $# -eq 0 ]] ; then
+    __listGists
+else
+    slugs=( $( __getMatchingSlugs $* ) )
+    if [[ ${#slugs[@]} -eq 0 ]] ; then
+        echo "No matches: $*"
+    elif [[ ${#slugs[@]} -eq 1 ]] ; then
+        __displayGist ${slugs[@]}
+    else
+        echo "Multiple matches: ${slugs[@]}"
+    fi
+fi

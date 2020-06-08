@@ -136,6 +136,9 @@ __setupUtilities() {
     cp "${DOCKER_SCRIPTS}/go" ${STAGE_BIN}/tinygo
     cp "${DOCKER_SCRIPTS}/sls" ${STAGE_BIN}/sls
 
+    # Any other commands
+    cp "${DOCKER_SCRIPTS}/scripts/gist" ${STAGE_BIN}/gist
+
     # Move commands from our staging area
     chmod +x ${STAGE_BIN}/*
     if [[ $runningLocally == true ]] ; then
