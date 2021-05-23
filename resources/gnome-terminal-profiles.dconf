@@ -1,0 +1,29 @@
+[/]
+default='7ec39319-182a-4589-a0b4-346bc8ed6438'
+list=['7ec39319-182a-4589-a0b4-346bc8ed6438']
+
+[:7ec39319-182a-4589-a0b4-346bc8ed6438]
+audible-bell=false
+background-color='#00002B2B3636'
+background-transparency-percent=4
+bold-color='#77A8D9'
+bold-color-same-as-fg=false
+bold-is-bright=false
+cursor-background-color='#BFBAB0'
+cursor-blink-mode='off'
+cursor-colors-set=true
+cursor-foreground-color='#FF3333'
+font='JetBrains Mono 10'
+foreground-color='#838394949696'
+highlight-background-color='#BFBAB0'
+highlight-colors-set=true
+highlight-foreground-color='#1F2430'
+nord-gnome-terminal-version='0.1.0'
+palette= ['#00002B2B3636', '#CBCB4B4B1616', '#58586E6E7575', '#65657B7B8383', '#838394949696', '#6C6C7171C4C4', '#9393A1A1A1A1', '#FDFDF6F6E3E3', '#070736364242', '#DCDC32322F2F', '#858599990000', '#B5B589890000', '#26268B8BD2D2', '#D3D336368282', '#2A2AA1A19898', '#EEEEE8E8D5D5']
+scrollbar-policy='never'
+use-system-font=false
+use-theme-background=false
+use-theme-colors=false
+use-theme-transparency=false
+use-transparent-background=false
+visible-name='Regolith'

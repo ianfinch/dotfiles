@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Get CPU usage
+mpstat 1 1 | while read line ; do
+    if [[ $( echo $line | grep Average ) != "" ]] ; then
+        idle=$( echo $line | sed -e 's/.* //' )
+        busy=$( echo "100 - $idle" | bc )
+        echo $( printf '%.2f%%' $busy )
+    fi
+done
