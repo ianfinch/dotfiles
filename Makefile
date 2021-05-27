@@ -34,4 +34,5 @@ terminal:
 .PHONY: backgrounds
 backgrounds:
 	gsettings set org.gnome.desktop.background picture-uri file:///$(CURDIR)/backgrounds/desktop.png
-	gsettings set org.gnome.desktop.screensaver picture-uri file:///$(CURDIR)/backgrounds/lockscreen.png
+	gsettings set org.gnome.gnome-flashback screensaver false
+	ln -sfn $(CURDIR)/backgrounds/lockscreen.png $(HOME)/.config/regolith/lockscreen.png

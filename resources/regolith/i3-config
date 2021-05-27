@@ -33,7 +33,8 @@ floating_maximum_size -1 x -1
 for_window [class="floating_window"] floating enable
 
 # Lock screen using mod+x
-bindsym $mod+x exec "i3lock -i$HOME/.config/backgrounds/lockscreen.png"
+set_from_resource $i3-wm.program.lock i3-wm.program.lock i3lock -i ~/.config/regolith/lockscreen.png
+bindsym $mod+x exec $i3-wm.program.lock
 
 ## Session // Exit App // <><Shift> q ##
 bindsym $mod+Shift+q kill
