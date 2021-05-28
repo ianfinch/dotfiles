@@ -1,0 +1,9 @@
+#!/bin/sh
+
+wlan=$( iwgetid -a | cut -d' ' -f1 )
+ssid=$( iwconfig $wlan | grep ESSID | cut -d'"' -f2 )
+strength=$( iwconfig $wlan | grep Quality | sed 's/^[^=]*=\([^ ]*\).*/\1/' )
+num=$( echo $strength | cut -d'/' -f1 )
+dom=$( echo $strength | cut -d'/' -f2 )
+strength=$( expr "${num}00" / $dom )
+echo "$ssid ($strength%)"

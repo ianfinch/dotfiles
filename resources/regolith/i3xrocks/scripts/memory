@@ -1,0 +1,7 @@
+#!/bin/sh
+
+gb=1048576
+mem=$( free | grep '^Mem' )
+total=$( expr $( echo $mem | cut -d' ' -f2 ) '/' $gb )
+free=$( expr $( echo $mem | cut -d' ' -f7 ) '/' $gb )
+echo "${free}G/${total}G"
