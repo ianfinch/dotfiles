@@ -3,5 +3,6 @@
 gb=1048576
 mem=$( free | grep '^Mem' )
 total=$( expr $( echo $mem | cut -d' ' -f2 ) '/' $gb )
-free=$( expr $( echo $mem | cut -d' ' -f7 ) '/' $gb )
+used=$( expr $( echo $mem | cut -d' ' -f7 ) '/' $gb )
+free=$( expr $total - $used )
 echo "${free}G/${total}G"
