@@ -21,6 +21,7 @@ dotfiles:
 .PHONY: regolith
 regolith:
 	mkdir -p $(HOME)/.config/regolith/i3
+	mkdir -p $(HOME)/.config/regolith/compton
 	ln -sfn $(CURDIR)/resources/regolith/i3-config $(HOME)/.config/regolith/i3/config
 	ln -sfn $(CURDIR)/resources/regolith/i3xrocks $(HOME)/.config/regolith/i3xrocks
 	regolith-look set lascaille

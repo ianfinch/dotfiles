@@ -1,0 +1,18 @@
+#!/bin/bash
+
+ordinal () {
+
+    echo $1 | sed -e 's/ \(1[0-9]\) / \1th /' \
+	          -e 's/\([ 23]1\) /\1st /' \
+	          -e 's/\([ 23]2\) /\1nd /' \
+	          -e 's/\([ 2]3\) /\1rd /' \
+	          -e 's/\([0-9]\) /\1th /'
+}
+
+if [[ "$1" == "test" ]] ; then
+    for i in {1..31} ; do
+        ordinal "| $i |"
+    done
+fi
+
+echo $( ordinal "$( date '+%a %-e %b %Y' )" )
