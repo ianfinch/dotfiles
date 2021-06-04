@@ -20,45 +20,50 @@ __status() {
         statusInit="    "
         status=$statusInit
         colour=${GREEN}
-	branch=""
+    branch=""
 
         if [[ ! -e ${dir}/.git ]] ; then
 
             status=$( echo "$status" | sed 's/ /!/' )
-	    colour=${RED}
+        colour=${RED}
 
         else
 
-		branch=" $( echo -e '\ue0a0' ) $( git -C ${dir} rev-parse -q --abbrev-ref HEAD )"
+            branch=" $( echo -e '\ue0a0' ) $( git -C ${dir} rev-parse -q --abbrev-ref HEAD )"
 
             if [[ $( git -C ${dir} status | grep Untracked -c ) -ne 0 ]] ; then
                 status=$( echo "$status" | sed 's/ /?/' )
-	        colour=${RED}
+                colour=${RED}
             fi
 
             if [[ $( git -C ${dir} status | grep "new file" -c ) -ne 0 ]] ; then
                 status=$( echo "$status" | sed 's/ /+/' )
-	        colour=${RED}
+                colour=${RED}
             fi
 
             if [[ $( git -C ${dir} status | grep modified -c ) -ne 0 ]] ; then
                 status=$( echo "$status" | sed 's/ /M/' )
-	        colour=${RED}
+                colour=${RED}
+            fi
+
+            if [[ $( git -C ${dir} status | grep deleted -c ) -ne 0 ]] ; then
+                status=$( echo "$status" | sed 's/ /D/' )
+                colour=${RED}
             fi
 
             if [[ $( git -C ${dir} status | grep ahead -c ) -ne 0 ]] ; then
                 arrow=$( echo -e '\u2191' )
                 status=$( echo "$status" | sed "s/ /$arrow/" )
-		if [[ "$colour" != "$RED" ]] ; then
-	            colour=${AMBER}
+                if [[ "$colour" != "$RED" ]] ; then
+                    colour=${AMBER}
                 fi
             fi
 
             if [[ $( git -C ${dir} status | grep behind -c ) -ne 0 ]] ; then
                 arrow=$( echo -e '\u2193' )
                 status=$( echo "$status" | sed "s/ /$arrow/" )
-		if [[ "$colour" != "$RED" ]] ; then
-	            colour=${AMBER}
+                if [[ "$colour" != "$RED" ]] ; then
+                    colour=${AMBER}
                 fi
             fi
         fi
