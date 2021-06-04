@@ -13,6 +13,8 @@ else
 fi
 
 chevronChar=$'\xee\x82\xb0'
+branchChar=$( echo -e '\ue0a0' )
+leadingSpace=$( echo -e '\u00a0' )
 
 setColour() {
     echo "\[\e[48;5;${swatch[$1]};38;5;230m\]"
@@ -26,9 +28,17 @@ chevron() {
     fi
 }
 
+git_branch() {
+    branch=$( git rev-parse -q --abbrev-ref HEAD 2> /dev/null )
+    if [[ "$branch" != "" ]] ; then
+        branch="$leadingSpace$branchChar $branch"
+    fi
+    echo $branch
+}
+
 machine="$(setColour 0)\h$(chevron 0 1)"
 username="$(setColour 1)\u$(chevron 1 2)"
-directory="$(setColour 2)\w$(chevron 2)"
+directory="$(setColour 2)\w\$(git_branch)$(chevron 2)"
 
 setTitle='\e]0;\u@\h:\W\a'
 setPrompt="${machine}${username}${directory}\[\e[m\] "

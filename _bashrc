@@ -98,7 +98,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 for file in ~/.bash_{aliases,prompt} ; do
     if [[ -r "$file" ]] && [[ -f "$file" ]] ; then
-    source "$file"
+        source "$file"
     fi
 done
 

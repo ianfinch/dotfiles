@@ -6,7 +6,7 @@ targetDir="${PWD}"
 # Colours
 GREEN=$( echo -e "\033[38:5:34m" )
 AMBER=$( echo -e "\033[38:5:166m" )
-RED=$( echo -e "\033[38:5:160m" )
+RED=$( echo -e "\033[38:5:196m" )
 BLUE=$( echo -e "\033[38:5:39m" )
 PLAIN=$( echo -e "\033[0m" )
 
@@ -20,6 +20,7 @@ __status() {
         statusInit="    "
         status=$statusInit
         colour=${GREEN}
+	branch=""
 
         if [[ ! -e ${dir}/.git ]] ; then
 
@@ -27,6 +28,8 @@ __status() {
 	    colour=${RED}
 
         else
+
+		branch=" $( echo -e '\ue0a0' ) $( git -C ${dir} rev-parse -q --abbrev-ref HEAD )"
 
             if [[ $( git -C ${dir} status | grep Untracked -c ) -ne 0 ]] ; then
                 status=$( echo "$status" | sed 's/ /?/' )
@@ -42,6 +45,22 @@ __status() {
                 status=$( echo "$status" | sed 's/ /M/' )
 	        colour=${RED}
             fi
+
+            if [[ $( git -C ${dir} status | grep ahead -c ) -ne 0 ]] ; then
+                arrow=$( echo -e '\u2191' )
+                status=$( echo "$status" | sed "s/ /$arrow/" )
+		if [[ "$colour" != "$RED" ]] ; then
+	            colour=${AMBER}
+                fi
+            fi
+
+            if [[ $( git -C ${dir} status | grep behind -c ) -ne 0 ]] ; then
+                arrow=$( echo -e '\u2193' )
+                status=$( echo "$status" | sed "s/ /$arrow/" )
+		if [[ "$colour" != "$RED" ]] ; then
+	            colour=${AMBER}
+                fi
+            fi
         fi
 
         if [[ "${status}" == "${statusInit}" ]] ; then
@@ -49,7 +68,7 @@ __status() {
             status=$( echo "$status" | sed "s/ /$tick/" )
         fi
 
-        echo " ${colour}${status} ${dir}${PLAIN}"
+        echo " ${colour}${status} ${dir}${branch}${PLAIN}"
     done
 }
 
