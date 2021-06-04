@@ -1,4 +1,8 @@
 #!/bin/sh
 
+scriptDir="$( dirname $( readlink -f $0 ) )/scripts"
+echo $scriptDir
+
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
 alias httpd='docker run -it --rm --name apache-httpd -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd:alpine'
+alias mgit="${scriptDir}/multigit.sh"
