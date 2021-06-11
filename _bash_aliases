@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 scriptDir="$( dirname $( readlink -f ${BASH_SOURCE[0]} ) )/scripts"
 
@@ -8,5 +8,13 @@ alias npm='docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PW
 
 # Custom stuff
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
-alias httpd='docker run -it --rm --name apache-httpd -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd:alpine'
 alias mgit="${scriptDir}/multigit.sh"
+
+# Need functions for slightly more complicated commands
+httpd() {
+    if [[ "$1" == "" ]] ; then
+        echo "Syntax: httpd <PORT>"
+    else
+        docker run -it --rm --name apache-httpd -p ${1}:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd:alpine
+    fi
+}
