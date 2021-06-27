@@ -8,6 +8,7 @@ alias npm='docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PW
 
 # Custom stuff
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
+alias docker-rm='docker rm $(docker ps -a --filter status=exited -q --no-trunc)'
 alias mgit="${scriptDir}/multigit.sh"
 
 # Need functions for slightly more complicated commands

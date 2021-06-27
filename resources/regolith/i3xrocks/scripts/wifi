@@ -6,8 +6,15 @@ strength=$( iwconfig $wlan | grep Quality | sed 's/^[^=]*=\([^ ]*\).*/\1/' )
 num=$( echo $strength | cut -d'/' -f1 )
 dom=$( echo $strength | cut -d'/' -f2 )
 strength=$( expr "${num}00" / $dom )
+
 if $( echo $ssid | grep -q ESSID:off ) ; then
-    ssid="disconnected"
+    ssid="Disconnected"
     strength="0"
 fi
+
+# Uncomment the next block to hide the wifi network
+#if [[ "$ssid" != "Disconnected" ]] ; then
+#    ssid="Online"
+#fi
+
 echo "$ssid ($strength%)"
