@@ -24,6 +24,7 @@ regolith:
 	mkdir -p $(HOME)/.config/regolith/compton
 	ln -sfn $(CURDIR)/resources/regolith/i3-config $(HOME)/.config/regolith/i3/config
 	ln -sfn $(CURDIR)/resources/regolith/i3xrocks $(HOME)/.config/regolith/i3xrocks
+	ln -sfn $(CURDIR)/resources/regolith/compton-config $(HOME)/.config/regolith/compton/config
 	regolith-look set lascaille
 	echo "#include \"$(CURDIR)/resources/regolith/Xresources-regolith\"" >> $(HOME)/.Xresources-regolith
 	regolith-look refresh
