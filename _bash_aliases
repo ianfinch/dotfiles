@@ -2,16 +2,31 @@
 
 scriptDir="$( dirname $( readlink -f ${BASH_SOURCE[0]} ) )/scripts"
 
-# Standard commands, but running in containers
-alias node='docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host node:alpine node'
-alias npm='docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host node:alpine npm'
+# --- Standard commands, but running in containers -----------------------------
 
-# Custom stuff
+node() {
+    docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm node $*
+}
+export -f node
+
+npm() {
+    docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm npm $*
+}
+export -f npm
+
+hugo() {
+    docker run -ti -v $PWD:/home/appuser --workdir /home/appuser -p 8888:8888 guzo/hugo hugo $*
+}
+export -f hugo
+
+# --- Custom stuff -------------------------------------------------------------
+
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
 alias docker-rm='docker rm $(docker ps -a --filter status=exited -q --no-trunc)'
 alias mgit="${scriptDir}/multigit.sh"
 
-# Need functions for slightly more complicated commands
+# --- Functions for slightly more complicated commands -------------------------
+
 httpd() {
     if [[ "$1" == "" ]] ; then
         echo "Syntax: httpd <PORT>"
