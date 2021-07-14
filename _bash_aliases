@@ -5,17 +5,25 @@ scriptDir="$( dirname $( readlink -f ${BASH_SOURCE[0]} ) )/scripts"
 # --- Standard commands, but running in containers -----------------------------
 
 node() {
-    docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm node $*
+    docker run -ti --rm --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm node $*
 }
 export -f node
 
 npm() {
-    docker run -ti --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm npm $*
+    if [ -t 1 ] ; then
+        docker run -ti --rm --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm npm $*
+    else
+        docker run -i --rm --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm npm $*
+    fi
 }
 export -f npm
 
 hugo() {
-    docker run -ti -v $PWD:/home/appuser --workdir /home/appuser -p 8888:8888 guzo/hugo hugo $*
+    if [ -t 1 ] ; then
+        docker run -ti --rm -v $PWD:/home/appuser --workdir /home/appuser -p 8888:8888 guzo/hugo hugo $*
+    else
+        docker run -i --rm -v $PWD:/home/appuser --workdir /home/appuser -p 8888:8888 guzo/hugo hugo $*
+    fi
 }
 export -f hugo
 

@@ -42,12 +42,16 @@ __status() {
             fi
 
             if [[ $( git -C ${dir} status | grep modified -c ) -ne 0 ]] ; then
-                status=$( echo "$status" | sed 's/ /M/' )
+#                modified=$( echo -e '\u270f' )
+                modified="M"
+                status=$( echo "$status" | sed "s/ /$modified/" )
                 colour=${RED}
             fi
 
             if [[ $( git -C ${dir} status | grep deleted -c ) -ne 0 ]] ; then
-                status=$( echo "$status" | sed 's/ /D/' )
+#                deleted=$( echo -e '\u274c' )
+                deleted="D"
+                status=$( echo "$status" | sed "s/ /$deleted/" )
                 colour=${RED}
             fi
 
