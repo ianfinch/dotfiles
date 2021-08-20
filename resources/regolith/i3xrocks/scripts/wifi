@@ -1,7 +1,9 @@
 #!/bin/bash
 
 wlan=$( iwgetid -a | cut -d' ' -f1 )
+ip4=$( ip a show $wlan | grep -o "inet [0-9.]*" | cut -d' ' -f2 )
 ssid=$( iwconfig $wlan | grep ESSID | cut -d'"' -f2 )
+
 strength=$( iwconfig $wlan | grep Quality | sed 's/^[^=]*=\([^ ]*\).*/\1/' )
 num=$( echo $strength | cut -d'/' -f1 )
 dom=$( echo $strength | cut -d'/' -f2 )
@@ -9,12 +11,12 @@ strength=$( expr "${num}00" / $dom )
 
 if $( echo $ssid | grep -q ESSID:off ) ; then
     ssid="Disconnected"
-    strength="0"
 fi
 
-# Uncomment the next block to hide the wifi network
-#if [[ "$ssid" != "Disconnected" ]] ; then
-#    ssid="Online"
-#fi
+# Hide the SSID in anon mode (e.g. for screen capture)
+if [[ -e /tmp/xrocks-anon ]] ; then
+    ssid="Online"
+    ip4="127.0.0.1"
+fi
 
-echo "$ssid ($strength%)"
+echo "$ip4 ($ssid $strength%)"

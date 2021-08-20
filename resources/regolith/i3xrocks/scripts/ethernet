@@ -1,0 +1,12 @@
+#!/bin/bash
+
+card=$( lshw -short -C network |& grep Ethernet | sed 's/^[^a-z]*\([a-z0-9]*\).*/\1/' )
+ip4=$( ip a show $card | grep -o "inet [0-9.]*" | cut -d' ' -f2 )
+speed=$( ethtool enp2s0f0 |& grep Speed | sed 's/^.*: //' )
+
+# Hide the IP address in anon mode (e.g. for screen capture)
+if [[ -e /tmp/xrocks-anon ]] ; then
+    ip4="127.0.0.1"
+fi
+
+echo "$ip4 ($speed)"

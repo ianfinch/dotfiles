@@ -5,15 +5,17 @@ scriptDir="$( dirname $( readlink -f ${BASH_SOURCE[0]} ) )/scripts"
 # --- Standard commands, but running in containers -----------------------------
 
 node() {
-    docker run -ti --rm --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm node $*
+    wd=$( echo "$PWD" | sed "s|/home/$USER|/home/node|" )
+    docker run -ti --rm --user node -v $HOME:/home/node -v "$PWD":"$PWD" --workdir "$wd" --net host guzo/npm node $*
 }
 export -f node
 
 npm() {
+    wd=$( echo "$PWD" | sed "s|/home/$USER|/home/node|" )
     if [ -t 1 ] ; then
-        docker run -ti --rm --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm npm $*
+        docker run -ti --rm --user node -v $HOME:/home/node -v "$PWD":"$PWD" --workdir "$wd" --net host guzo/npm npm $*
     else
-        docker run -i --rm --user node -v $HOME:/home/node --workdir $( echo "$PWD" | sed "s|/home/$USER|/home/node|" ) --net host guzo/npm npm $*
+        docker run -i --rm --user node -v $HOME:/home/node -v "$PWD":"$PWD" --workdir "$wd" --net host guzo/npm npm $*
     fi
 }
 export -f npm
@@ -40,5 +42,21 @@ httpd() {
         echo "Syntax: httpd <PORT>"
     else
         docker run -it --rm --name apache-httpd -p ${1}:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd:alpine
+    fi
+}
+
+# --- Anonymise xrocks status line for use during screen sharing ---------------
+
+xrocks() {
+    if [[ "$1" == "" ]] ; then
+        echo "Syntax: xrocks ( anon | show )"
+    elif [[ "$1" == "anon" ]] ; then
+        touch /tmp/xrocks-anon
+    elif [[ "$1" == "show" ]] ; then
+        if [[ -e /tmp/xrocks-anon ]] ; then
+            rm /tmp/xrocks-anon
+        fi
+    else
+        echo "Syntax error: xrocks ( anon | show )"
     fi
 }
