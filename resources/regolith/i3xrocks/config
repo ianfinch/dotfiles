@@ -32,7 +32,6 @@ label=
 interval=10
 
 [wifi]
-label= 
 interval=10
 
 [volume]

@@ -1,4 +1,5 @@
 i3-wm.bar.position: top
 i3-wm.bar.background.color: "#000066"
+i3-wm.bar.statusline.color: "#ffffff"
 i3-wm.bar.status_command: i3xrocks -c ~/.config/regolith/i3xrocks/config
 i3-wm.bar.font: pango:DejaVu Sans Mono, Material Design Icons 10

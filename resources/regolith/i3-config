@@ -178,7 +178,7 @@ bindsym $mod+r mode "resize"
 
 set_from_resource $i3-wm.bar.background.color i3-wm.bar.background.color "#000066"
 set_from_resource $i3-wm.bar.statusline.color i3-wm.bar.statusline.color "#93a1a1"
-set_from_resource $i3-wm.bar.separator.color i3-wm.bar.separator.color "#268bd2"
+set_from_resource $i3-wm.bar.separator.color i3-wm.bar.separator.color "#ffffff"
 
 set_from_resource $i3-wm.bar.workspace.focused.border.color i3-wm.bar.workspace.focused.border.color "#073642"
 set_from_resource $i3-wm.bar.workspace.focused.background.color i3-wm.bar.workspace.focused.background.color "#073642"
@@ -200,7 +200,7 @@ set_from_resource $i3-wm.bar.workspace.urgent.text.color i3-wm.bar.workspace.urg
 
 set_from_resource $i3-wm.bar.position i3-wm.bar.position top
 set_from_resource $i3-wm.bar.font i3-wm.bar.font pango:Source Code Pro Medium 10, Material Design Icons 10
-set_from_resource $i3-wm.bar.separator i3-wm.bar.separator " "
+set_from_resource $i3-wm.bar.separator i3-wm.bar.separator "|"
 set_from_resource $i3-wm.bar.trayoutput i3-wm.bar.trayoutput none
 set_from_resource $i3-wm.bar.stripworkspacenumbers i3-wm.bar.stripworkspacenumbers yes
 set_from_resource $i3-wm.bar.status_command i3-wm.bar.status_command i3xrocks -c ~/.config/regolith/i3xrocks/config

@@ -1,17 +1,22 @@
 #!/bin/bash
 
+wifiIcon="$( echo -e '\uf5a9' )"
+nowifiIcon="$( echo -e '\uf5aa' )"
+
 wlan=$( iwgetid -a | cut -d' ' -f1 )
-ip4=$( ip a show $wlan | grep -o "inet [0-9.]*" | cut -d' ' -f2 )
 ssid=$( iwconfig $wlan | grep ESSID | cut -d'"' -f2 )
+
+if $( echo $ssid | grep -q ESSID:off ) ; then
+    echo "${nowifiIcon} Disconnected"
+    exit
+fi
 
 strength=$( iwconfig $wlan | grep Quality | sed 's/^[^=]*=\([^ ]*\).*/\1/' )
 num=$( echo $strength | cut -d'/' -f1 )
 dom=$( echo $strength | cut -d'/' -f2 )
 strength=$( expr "${num}00" / $dom )
 
-if $( echo $ssid | grep -q ESSID:off ) ; then
-    ssid="Disconnected"
-fi
+ip4=$( ip a show $wlan | grep -o "inet [0-9.]*" | cut -d' ' -f2 )
 
 # Hide the SSID in anon mode (e.g. for screen capture)
 if [[ -e /tmp/xrocks-anon ]] ; then
@@ -19,4 +24,4 @@ if [[ -e /tmp/xrocks-anon ]] ; then
     ip4="127.0.0.1"
 fi
 
-echo "$ip4 ($ssid $strength%)"
+echo "${wifiIcon} $ip4 ($ssid $strength%)"

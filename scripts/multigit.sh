@@ -4,10 +4,10 @@ cmd=""
 targetDir="${PWD}"
 
 # Colours
-GREEN=$( echo -e "\033[38:5:34m" )
-AMBER=$( echo -e "\033[38:5:166m" )
-RED=$( echo -e "\033[38:5:196m" )
-BLUE=$( echo -e "\033[38:5:39m" )
+GREEN=$( echo -e "\033[38;5;34m" )
+AMBER=$( echo -e "\033[38;5;166m" )
+RED=$( echo -e "\033[38;5;196m" )
+BLUE=$( echo -e "\033[38;5;39m" )
 PLAIN=$( echo -e "\033[0m" )
 
 __syntax() {
