@@ -13,8 +13,8 @@ gui: regolith terminal backgrounds
 .PHONY: dotfiles
 dotfiles:
 	mkdir -p $(HOME)/.config
-	for file in $(shell find $(CURDIR) -name "_*" -not -name "*.swp") ; do \
-		f=$$(basename $$file | sed 's/^_/./'); \
+	for file in $(shell find $(CURDIR) -path "$(CURDIR)/_*" -type f -not -name "*.swp") ; do \
+		f=$$(echo $$file | sed 's|^$(CURDIR)/_|.|'); \
 		ln -sfn $$file $(HOME)/$$f; \
 	done
 
