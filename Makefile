@@ -8,7 +8,7 @@ all: cli gui
 cli: dotfiles
 
 .PHONY: gui
-gui: regolith terminal backgrounds
+gui: regolith terminal backgrounds applications
 
 .PHONY: dotfiles
 dotfiles:
@@ -32,6 +32,13 @@ regolith:
 .PHONY: terminal
 terminal:
 	dconf load /org/gnome/terminal/legacy/profiles:/ < $(CURDIR)/resources/gnome-terminal-profiles.dconf
+
+.PHONY: applications
+applications:
+	for file in $(shell find $(CURDIR) -path "$(CURDIR)/resources/applications/*" -type f -not -name "*.swp") ; do \
+		f=$$(echo $$file | sed 's|^$(CURDIR)/resources/applications/||'); \
+		ln -sfn $$file $(HOME)/.local/share/applications/$$f; \
+	done
 
 .PHONY: backgrounds
 backgrounds:

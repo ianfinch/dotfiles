@@ -19,7 +19,7 @@ bindsym $mod+b exec gtk-launch $(xdg-settings get default-web-browser)
 bindsym $mod+f exec "nautilus"
 
 ## Launch // Mail // <> m ##
-bindsym $mod+m exec "evolution"
+bindsym $mod+m exec "GTK_THEME=Pop evolution"
 
 ## Launch // Password Safe // <> p ##
 bindsym $mod+p exec /usr/bin/pwsafe
