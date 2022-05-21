@@ -29,6 +29,11 @@ hugo() {
 }
 export -f hugo
 
+opa() {
+    docker run -ti --rm -v $PWD:/home/appuser --workdir /home/appuser -p 8181:8181 openpolicyagent/opa $*
+}
+export -f node
+
 # --- Custom stuff -------------------------------------------------------------
 
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
