@@ -32,7 +32,12 @@ export -f hugo
 opa() {
     docker run -ti --rm -v $PWD:/home/appuser --workdir /home/appuser -p 8181:8181 openpolicyagent/opa $*
 }
-export -f node
+export -f opa
+
+cosign() {
+    docker run -ti --rm -v $PWD:/home/appuser --workdir /home/appuser --user $(id -u):$(id -g) bitnami/cosign $*
+}
+export -f cosign
 
 # --- Custom stuff -------------------------------------------------------------
 
