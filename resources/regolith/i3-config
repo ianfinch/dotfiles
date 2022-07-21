@@ -40,16 +40,13 @@ bindsym $mod+x exec $i3-wm.program.lock
 bindsym $mod+Shift+q kill
 
 ## Launch // Application launcher // <> d ##
-set_from_resource $rofiTheme rofi.theme /etc/regolith/styles/lascaille/rofi.rasi
-set_from_resource $i3-wm.program.launcher.app i3-wm.program.launcher.app rofi -show drun -theme $rofiTheme
-bindsym $mod+d exec $i3-wm.program.launcher.app
+bindsym $mod+d exec ~/.config/regolith/scripts/launcher
 
 ## Launch // Screenshot // <> S ##
 bindsym $mod+s exec gnome-screenshot -i
 
 ## Launch // This help // <><Shift> ? ##
-set_from_resource $i3-wm.program.help i3-wm.program.help /usr/bin/remontoire-toggle
-bindsym $mod+Shift+question exec --no-startup-id $i3-wm.program.help
+bindsym $mod+Shift+question exec --no-startup-id ~/.config/regolith/scripts/show-bindings
 
 # change focus with vi keys
 bindsym $mod+h focus left

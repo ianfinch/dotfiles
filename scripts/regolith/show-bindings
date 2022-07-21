@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Show the available i3 bindings.  Prefer ilia as the Regolith 2.0 choice, but
+# drop back to remontoire from Regolith 1.6 if necessary
+
+if [[ -e /usr/bin/ilia ]] ; then
+
+    /usr/bin/ilia -p keybindings
+
+else
+
+    /usr/bin/remontoire-toggle
+
+fi

@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Open the launcher.  Prefer ilia as the Regolith 2.0 choice, but drop back to
+# rofi from Regolith 1.6 if necessary
+
+if [[ -e /usr/bin/ilia ]] ; then
+
+    /usr/bin/ilia
+
+else
+
+    /usr/bin/rofi -show drun -theme /etc/regolith/styles/lascaille/rofi.rasi
+
+fi

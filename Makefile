@@ -22,9 +22,12 @@ dotfiles:
 regolith:
 	mkdir -p $(HOME)/.config/regolith/i3
 	mkdir -p $(HOME)/.config/regolith/compton
+	mkdir -p $(HOME)/.config/regolith/scripts
 	ln -sfn $(CURDIR)/resources/regolith/i3-config $(HOME)/.config/regolith/i3/config
 	ln -sfn $(CURDIR)/resources/regolith/i3xrocks $(HOME)/.config/regolith/i3xrocks
 	ln -sfn $(CURDIR)/resources/regolith/compton-config $(HOME)/.config/regolith/compton/config
+	ln -sfn $(CURDIR)/scripts/regolith/launcher $(HOME)/.config/regolith/scripts/launcher
+	ln -sfn $(CURDIR)/scripts/regolith/show-bindings $(HOME)/.config/regolith/scripts/show-bindings
 	regolith-look set lascaille
 	regolith-look refresh
 
