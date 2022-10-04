@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cmd=""
+cmd="$1"
 targetDir="${PWD}"
 
 # Colours
@@ -81,12 +81,40 @@ __status() {
     done
 }
 
-while [[ $# -gt 0 ]] ; do
-    echo TEST $1
-    shift
-done
+# List available commands
+__help() {
+
+    command=$( basename $0 )
+    params=$( grep "\$cmd\" ==" $0 | sed -e 's/[^=]*== "\([^"]*\)"[^=]*/\1 /g' \
+                                   | tr " " "\n" \
+                                   | sort \
+                                   | tr "\n" " " \
+                                   | sed -e 's/  */ /g' -e 's/^ //' -e 's/ $//' -e 's/ / | /g' )
+    echo "Syntax: $command [ ${params} ]"
+}
+
+# Check for help command
+# Check for a list command
+if [[ "$cmd" == "ls" || "$cmd" == "list" ]] ; then
+
+    find . -mindepth 2 -maxdepth 2 -name '.git' -exec grep url {}/config \; \
+        | cut -d'=' -f2 \
+        | sed -e 's/^ //'
 
 # If there is no command, we should do a status check
-if [[ "$cmd" == "" ]] ; then
+elif [[ "$cmd" == "" ]] ; then
+
     __status
+
+# We can supply some help
+elif [[ "$cmd" == "help" ]] ; then
+
+    __help
+
+# Any other command is an error
+else
+
+    echo "Unrecognised command: ${cmd}"
+    __help
+    exit 1
 fi
