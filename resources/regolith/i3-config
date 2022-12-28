@@ -245,3 +245,6 @@ exec --no-startup-id $i3-wm.program.notifications
 # Hide the mouse pointer if unused for a duration
 set_from_resource $i3-wm.program.unclutter i3-wm.program.unclutter /usr/bin/regolith-ftue /usr/bin/unclutter -b
 exec --no-startup-id $i3-wm.program.unclutter
+
+# Floating windows
+for_window [class="qjackctl"] floating enable
