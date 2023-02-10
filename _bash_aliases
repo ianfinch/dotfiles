@@ -39,6 +39,32 @@ cosign() {
 }
 export -f cosign
 
+tinygo() {
+
+    envvars=$( env | grep "^GO" | while read envvar ; do
+
+        varname=$( echo "${envvar}" | cut -d'=' -f1 )
+        if [[ "${varname}" == "GOPATH" ]] ; then
+
+            echo "-v $GOPATH:/go -e \"GOPATH=/go\""
+        fi
+
+    done )
+
+    if [[ "$1" == "bash" ]] ; then
+
+        docker run --rm -ti -v "$(pwd)":/home/tinygo -v "$(pwd)":/src ${envvars} tinygo/tinygo bash
+
+    elif [[ "$1" == "go" ]] ; then
+
+        docker run --rm -ti -v "$(pwd)":/home/tinygo -v "$(pwd)":/src ${envvars} tinygo/tinygo $*
+    else
+
+        docker run --rm -v "$(pwd)":/home/tinygo -v "$(pwd)":/src ${envvars} tinygo/tinygo tinygo $*
+    fi
+}
+export -f tinygo
+
 # --- Custom stuff -------------------------------------------------------------
 
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
