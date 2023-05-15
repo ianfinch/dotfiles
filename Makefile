@@ -8,7 +8,7 @@ all: cli gui
 cli: dotfiles
 
 .PHONY: gui
-gui: regolith terminal backgrounds applications
+gui: regolith terminal backgrounds applications themes
 
 .PHONY: dotfiles
 dotfiles:
@@ -47,3 +47,11 @@ backgrounds:
 	gsettings set org.gnome.desktop.background picture-uri file:///$(CURDIR)/backgrounds/desktop.png
 	gsettings set org.gnome.gnome-flashback screensaver false
 	ln -sfn $(CURDIR)/backgrounds/lockscreen.png $(HOME)/.config/regolith/lockscreen.png
+
+.PHONY: themes
+themes:
+	mkdir -p $(HOME)/.themes
+	for file in $(shell ls $(CURDIR)/resources/themes) ; do \
+		tar zxf $(CURDIR)/resources/themes/$$file --directory=$(HOME)/.themes ; \
+	done
+	gsettings set org.gnome.desktop.interface gtk-theme WhiteSur-Light-solid

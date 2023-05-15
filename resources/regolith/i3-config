@@ -231,7 +231,7 @@ client.urgent           #ffffff #000000 #ffffff #900000 #900000
 client.placeholder      #ffffff #000000 #ffffff #000000 #000000
 
 # For i3 gaps
-gaps inner 12
+gaps inner 8
 gaps outer 0
 
 # Start the installed regolith-compositor
