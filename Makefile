@@ -51,7 +51,5 @@ backgrounds:
 .PHONY: themes
 themes:
 	mkdir -p $(HOME)/.themes
-	for file in $(shell ls $(CURDIR)/resources/themes) ; do \
-		tar zxf $(CURDIR)/resources/themes/$$file --directory=$(HOME)/.themes ; \
-	done
-	gsettings set org.gnome.desktop.interface gtk-theme WhiteSur-Light-solid
+	cat $(CURDIR)/resources/themes/02-Flat-Remix-GTK-Green-20220627.tar.xz | xz --decompress --stdout | tar xf - --directory=$(HOME)/.themes
+	gsettings set org.gnome.desktop.interface gtk-theme Flat-Remix-GTK-Green-Light
