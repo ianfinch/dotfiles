@@ -1,4 +1,4 @@
-# Set up prompt (tried with solarized)
+# Set up prompt
 #
 # Notes
 #  - uses Powerline font for chevrons
@@ -7,12 +7,16 @@
 export TERM=xterm-color
 
 if [[ `whoami` == "root" ]] ; then
-   swatch=(124 160 202 235)
+   swatch=(124 160 202 235 220)
+   promptChar="#"
 else
-   swatch=(61 33 37 235)
+   swatch=(61 33 37 235 220)
+   promptChar='$'
 fi
 
 chevronChar=$'\xee\x82\xb0'
+startChar=$'\xee\x82\xb6'
+finishChar=$'\xee\x82\xb4'
 branchChar=$( echo -e '\ue0a0' )
 leadingSpace=$( echo -e '\u00a0' )
 
@@ -28,6 +32,30 @@ chevron() {
     fi
 }
 
+start() {
+    if [[ "$2" == "" ]] ; then
+        echo "\[\e[m\e[38;5;${swatch[$1]}m\]$startChar"
+    else
+        echo "\[\e[48;5;${swatch[$2]};38;5;${swatch[$1]}m\]$startChar"
+    fi
+}
+
+finish() {
+    if [[ "$2" == "" ]] ; then
+        echo "\[\e[m\e[38;5;${swatch[$1]}m\]$finishChar"
+    else
+        echo "\[\e[48;5;${swatch[$2]};38;5;${swatch[$1]}m\]$finishChar"
+    fi
+}
+
+prompt() {
+    if [[ "$2" == "" ]] ; then
+        echo "\[\e[m\e[38;5;${swatch[$1]}m\]$promptChar"
+    else
+        echo "\[\e[48;5;${swatch[$2]};38;5;${swatch[$1]}m\]$promptChar"
+    fi
+}
+
 git_branch() {
     branch=$( git rev-parse -q --abbrev-ref HEAD 2> /dev/null )
     if [[ "$branch" != "" ]] ; then
@@ -36,11 +64,12 @@ git_branch() {
     echo $branch
 }
 
-machine="$(setColour 0)\h$(chevron 0 1)"
-username="$(setColour 1)\u$(chevron 1 2)"
-directory="$(setColour 2)\w\$(git_branch)$(chevron 2)"
+machine="$(start 0)$(setColour 0)\h $(chevron 0 1)"
+username="$(setColour 1) \u $(chevron 1 2)"
+directory="$(setColour 2) \w\$(git_branch)$(finish 2)"
 
 setTitle='\e]0;\u@\h:\W\a'
-setPrompt="${machine}${username}${directory}\[\e[m\] "
+setPrompt="${machine}${username}${directory}\[\e[m\]\n$(prompt 4) "
 
 export PS1="$setTitle$setPrompt"
+export PS0="\[\e[m"
