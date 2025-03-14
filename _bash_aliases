@@ -70,6 +70,8 @@ export -f tinygo
 alias docker-rmi='docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
 alias docker-rm='docker rm $(docker ps -a --filter status=exited -q --no-trunc)'
 alias mgit="${scriptDir}/multigit.sh"
+alias xcolors="${scriptDir}/xcolors.sh"
+alias xcolors.json="cat ${scriptDir}/../resources/xcolors.json"
 
 # Cmus doesn't detect 256 colours from xterm-color
 alias cmus='TERM=xterm-256color /usr/bin/cmus'
