@@ -21,6 +21,7 @@ dotfiles:
 
 .PHONY: regolith
 regolith:
+	rm -rf $(HOME)/.config/regolith3
 	ln -s $(HOME)/.config/regolith $(HOME)/.config/regolith3
 	mkdir -p $(HOME)/.config/regolith/i3
 	mkdir -p $(HOME)/.config/regolith/compton
