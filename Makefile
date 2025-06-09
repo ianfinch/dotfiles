@@ -8,11 +8,12 @@ all: cli gui
 cli: dotfiles
 
 .PHONY: gui
-gui: regolith terminal backgrounds applications themes
+gui: regolith terminal backgrounds applications themes fonts
 
 .PHONY: dotfiles
 dotfiles:
 	mkdir -p $(HOME)/.config
+	mkdir -p $(HOME)/.config/cmus
 	for file in $(shell find $(CURDIR) -path "$(CURDIR)/_*" -type f -not -name "*.swp") ; do \
 		f=$$(echo $$file | sed 's|^$(CURDIR)/_|.|'); \
 		ln -sfn $$file $(HOME)/$$f; \
@@ -53,3 +54,11 @@ themes:
 	mkdir -p $(HOME)/.themes
 	cat $(CURDIR)/resources/themes/02-Flat-Remix-GTK-Green-20220627.tar.xz | xz --decompress --stdout | tar xf - --directory=$(HOME)/.themes
 	gsettings set org.gnome.desktop.interface gtk-theme Flat-Remix-GTK-Green-Light
+
+.PHONY: fonts
+fonts:
+	mkdir -p $(HOME)/.fonts
+	curl -fL -o /tmp/Inconsolata.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Inconsolata.zip
+	mkdir /tmp/fonts
+	unzip -d /tmp/fonts /tmp/Inconsolata.zip
+	cp /tmp/fonts/*.ttf $(HOME)/.fonts
