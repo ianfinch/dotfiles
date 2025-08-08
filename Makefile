@@ -5,7 +5,7 @@ SHELL := bash
 all: cli gui
 
 .PHONY: cli
-cli: dotfiles
+cli: dotfiles bin
 
 .PHONY: gui
 gui: regolith terminal backgrounds applications themes fonts
@@ -18,6 +18,16 @@ dotfiles:
 		f=$$(echo $$file | sed 's|^$(CURDIR)/_|.|'); \
 		ln -sfn $$file $(HOME)/$$f; \
 	done
+
+.PHONY: bin
+bin:
+	mkdir -p $(HOME)/.local/bin
+	ln -sfn $(CURDIR)/bin/mgit $(HOME)/.local/bin/mgit
+	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/node
+	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/npm
+	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/lessc
+	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/onchange
+	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/jest
 
 .PHONY: regolith
 regolith:

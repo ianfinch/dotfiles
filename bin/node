@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cmd=$( basename $0 )
+wd=$( echo "$PWD" | sed "s|/home/${USER}|/home/node|" )
+
+if [[ "$( tty )" == "not a tty" ]] ; then
+    docker run --rm --user node -v $HOME:/home/node -v "$PWD":"$PWD" --workdir "$wd" --net host guzo/node $cmd $*
+else
+    docker run -ti --rm --user node -v $HOME:/home/node -v "$PWD":"$PWD" --workdir "$wd" --net host guzo/node $cmd $*
+fi
