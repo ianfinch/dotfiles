@@ -112,3 +112,10 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# Include my local bin in my path
+if [ -d "$HOME/.local/bin" ] ; then
+    if [[ "$( echo "$PATH" | grep "/.local/bin" )" == "" ]] ; then
+        PATH="$HOME/.local/bin:$PATH"
+    fi
+fi
