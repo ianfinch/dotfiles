@@ -28,6 +28,7 @@ bin:
 	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/lessc
 	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/onchange
 	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/jest
+	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/live-server
 
 .PHONY: regolith
 regolith:
