@@ -23,12 +23,6 @@ dotfiles:
 bin:
 	mkdir -p $(HOME)/.local/bin
 	ln -sfn $(CURDIR)/bin/mgit $(HOME)/.local/bin/mgit
-	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/node
-	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/npm
-	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/lessc
-	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/onchange
-	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/jest
-	ln -sfn $(CURDIR)/bin/node $(HOME)/.local/bin/live-server
 
 .PHONY: regolith
 regolith:
