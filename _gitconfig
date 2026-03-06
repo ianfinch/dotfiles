@@ -2,4 +2,4 @@
 	email = ianfinch@users.noreply.github.com
 	name = Ian Finch
 [alias]
-	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(blue)<%an>%Creset' --abbrev-commit
+	lg = "log --graph --pretty=format:'%C(#75d7ec)%h%Creset -%C(#e4f34a)%d%Creset %s %C(#42e66c)(%cr) %C(#bd93f9)%an <%ae>%Creset' --abbrev-commit"
