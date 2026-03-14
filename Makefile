@@ -23,6 +23,7 @@ dotfiles:
 bin:
 	mkdir -p $(HOME)/.local/bin
 	ln -sfn $(CURDIR)/bin/mgit $(HOME)/.local/bin/mgit
+	ln -sfn $(CURDIR)/bin/become $(HOME)/.local/bin/become
 
 .PHONY: regolith
 regolith:

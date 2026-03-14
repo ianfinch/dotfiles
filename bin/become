@@ -1,0 +1,10 @@
+#!/bin/bash
+
+user="$1"
+if [[ "$user" == "" ]] ; then
+    echo "Syntax: $( basename $0 ) <user>"
+    exit 1
+fi
+
+cd /home/${user}
+sudo -u ${user} bash -l
