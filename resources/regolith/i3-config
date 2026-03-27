@@ -228,9 +228,9 @@ bar {
 
 # No borders
 for_window [class=".*"] border pixel 2
-client.focused          #ffcc13 #ffcc13 #000000 #ffcc13 #ffcc13
-client.focused_inactive #cd7f32 #cd7f32 #000000 #cd7f32 #cd7f32
-client.unfocused        #333333 #333333 #999999 #333333 #333333
+client.focused          #ffcc13 #ffcc13 #934e00 #ffcc13 #ffcc13
+client.focused_inactive #cd7f32 #cd7f32 #633a00 #cd7f32 #cd7f32
+client.unfocused        #003366 #003366 #6699cc #003366 #003366
 client.urgent           #900000 #900000 #ffffff #900000 #900000
 client.placeholder      #000000 #000000 #ffffff #000000 #000000
 
