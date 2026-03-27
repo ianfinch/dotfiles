@@ -32,18 +32,18 @@ bindsym $mod+c exec $i3-wm.program.settings
 floating_maximum_size -1 x -1
 for_window [class="floating_window"] floating enable
 
-# Lock screen using mod+x
+## Session // Lock screen // <> x ##
 set_from_resource $i3-wm.program.lock i3-wm.program.lock i3lock -t -i ~/.config/regolith/lockscreen.png
 bindsym $mod+x exec $i3-wm.program.lock
 
-## Session // Exit App // <><Shift> q ##
+## Session // Exit app // <><Shift> q ##
 bindsym $mod+Shift+q kill
 
 ## Launch // Application launcher // <> d ##
 bindsym $mod+d exec ~/.config/regolith/scripts/launcher
 
-## Launch // Screenshot // <> S ##
-bindsym $mod+s exec gnome-screenshot -i
+## Launch // Screenshot // <><Shift> S ##
+bindsym $mod+Shift+s exec gnome-screenshot -i
 
 ## Launch // This help // <><Shift> ? ##
 bindsym $mod+Shift+question exec --no-startup-id ~/.config/regolith/scripts/show-bindings
@@ -82,13 +82,17 @@ bindsym $mod+bar split h
 # split in vertical orientation
 bindsym $mod+minus split v
 
-# enter fullscreen mode for the focused container
+## Windows // Full screen window // <><Shift> f ##
 bindsym $mod+Shift+f fullscreen toggle
 
-# change container layout (stacked, tabbed, toggle split)
-bindsym $mod+t layout toggle split
-bindsym $mod+Shift+s layout stacking
-bindsym $mod+Shift+t layout tabbed
+## Windows // Stacked mode // <> s ##
+bindsym $mod+s layout stacking
+
+## Windows // Tabbed mode // <> w ##
+bindsym $mod+w layout tabbed
+
+## Windows // Tiling mode // <> e ##
+bindsym $mod+e layout default
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -223,12 +227,12 @@ bar {
 }
 
 # No borders
-for_window [class=".*"] border pixel 0
-client.focused          #ffffff #000000 #ffffff #ff6600 #ff6600
-client.focused_inactive #ffffff #000000 #ffffff #333333 #333333
-client.unfocused        #ffffff #000000 #ffffff #333333 #333333
-client.urgent           #ffffff #000000 #ffffff #900000 #900000
-client.placeholder      #ffffff #000000 #ffffff #000000 #000000
+for_window [class=".*"] border pixel 2
+client.focused          #ff9913 #ff9913 #000000 #ff9913 #ff9913
+client.focused_inactive #cd7f32 #cd7f32 #000000 #cd7f32 #cd7f32
+client.unfocused        #333333 #333333 #999999 #333333 #333333
+client.urgent           #900000 #900000 #ffffff #900000 #900000
+client.placeholder      #000000 #000000 #ffffff #000000 #000000
 
 # For i3 gaps
 gaps inner 8
