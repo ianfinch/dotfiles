@@ -28,7 +28,7 @@ markup=none
 # Check here for icon unicodes: https://pictogrammers.github.io/@mdi/font/3.2.89/
 
 [ethernet]
-label= 
+label=󰈀 
 interval=10
 
 [wifi]
@@ -42,7 +42,7 @@ interval=once
 signal=10
 
 [memory]
-label= 
+label=  
 interval=30
 
 [disk]
@@ -50,7 +50,7 @@ label=HOME
 interval=30
 
 [cpu]
-label= 
+label=󰊚  
 interval=10
 
 [battery]
@@ -59,16 +59,16 @@ interval=10
 #interval=30
 
 [time]
-label= 
+label=   
 command=$HOME/.config/regolith/i3xrocks/scripts/ordinal-date
 interval=5
 separator=false
 
 [time]
-label= 
+label=  
 command=date '+%H:%M '
 interval=5
-color=#ffff00
+color=#ffcc13
 
 # Generic media player support
 #
