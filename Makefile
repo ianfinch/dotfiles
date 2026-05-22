@@ -5,7 +5,7 @@ SHELL := bash
 all: cli gui
 
 .PHONY: cli
-cli: dotfiles bin
+cli: dotfiles bin liveserver
 
 .PHONY: gui
 gui: regolith terminal backgrounds applications themes fonts
@@ -24,6 +24,10 @@ bin:
 	mkdir -p $(HOME)/.local/bin
 	ln -sfn $(CURDIR)/bin/mgit $(HOME)/.local/bin/mgit
 	ln -sfn $(CURDIR)/bin/become $(HOME)/.local/bin/become
+
+.PHONY: liveserver
+liveserver:
+	cat $(CURDIR)/resources/live-server/config/live-server.json | sed "s|__BASE__|$(CURDIR)|" > $(HOME)/.live-server.json
 
 .PHONY: regolith
 regolith:

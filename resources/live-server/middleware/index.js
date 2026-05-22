@@ -1,0 +1,118 @@
+/**
+ * Middleware so I can use non-web files from live-server
+ */
+
+// Work out where our system directory is
+const systemDir = __dirname.replace("/middleware", "");
+
+// List of file extensions to pass through unchanged
+const passThrough = [
+    "css",
+    "gif",
+    "htm",
+    "html",
+    "jpg",
+    "js",
+    "mjs",
+    "pdf",
+    "png",
+    "svg"
+];
+
+// MIME types
+const mime = {
+    css: "text/css",
+    js: "text/javascript",
+    mjs: "text/javascript"
+};
+
+// We need to manipulate file paths
+const fs = require("fs");
+const path = require("node:path");
+
+// Read in our HTML template
+const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "webserver.html").toString().split("<!-- CONTENT -->");
+
+// Actual middleware function
+module.exports = function(req, res, next) {
+
+    // Where are we running
+    const cwd = process.cwd();
+
+    // Get the file extension
+    const parsedUrl = path.parse(req.url);
+    const extension = parsedUrl.ext.replace(/^\./, "");
+
+    // Check whether this is a system file
+    if (req.url.match(/^\/system\//)) {
+
+        let filepath = req.url;
+        filepath = filepath.replace(/^\/system\/lib\//, "/lib/");
+        filepath = filepath.replace(/^\/system\//, "/content/");
+        filepath = systemDir + path.sep + filepath;
+        const fileContent = fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
+        res.setHeader("Content-Type", mime[extension]);
+        res.write(fileContent);
+        res.end();
+        return;
+    }
+
+    // Check for favicon
+    if (req.url === "/favicon.ico") {
+        const filepath = systemDir + path.sep + "favicon.ico";
+        const fileContent = fs.readFileSync(filepath, { flag: "r" });
+        res.write(fileContent);
+        res.end();
+        return;
+    }
+
+    // Check whether we just pass this through as is
+    const lastChar = req.url.substring(req.url.length - 1, req.url.length);
+    const filepath = cwd + (path.sep === "/" ? req.url : req.url.replace(/\//g, path.sep));
+    const isDir = fs.lstatSync(filepath).isDirectory();
+    if (isDir || passThrough.includes(extension)) {
+
+        next();
+        return
+    }
+
+    // From here on down, we are treating as markdown
+    // Work out the name of this page and get the content
+    const filename = parsedUrl.base;
+    const fileContent = fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
+    let escapedContent = fileContent.replace(/&/g, "&amp;")
+                                    .replace(/</g, "&lt;")
+                                    .replace(/>/g, "&gt;");
+
+    // If we don't have a final newline, add one
+    if (escapedContent.substr(-1) !== "\n") {
+        escapedContent = escapedContent + "\n";
+    }
+
+    // Render as HTML and embed the file contents
+    const dirname = parsedUrl.dir + ( parsedUrl.dir === "/" ? "" : "/");
+    res.write(html[0].replace(/<!-- TITLE -->/g, dirname + filename));
+
+    // If it's markdown, we render it
+    if (extension === "md") {
+        res.write(escapedContent);
+
+    // Mermaid diagram we use mermaid formatting
+    } else if (extension === "mmd") {
+
+        res.write("```mermaid\n");
+        res.write(escapedContent);
+        res.write("```\n");
+
+    // Anything else we display as text
+    } else {
+
+        res.write("```\n");
+        res.write(escapedContent);
+        res.write("```\n");
+    }
+
+    // Remainder of the HTML we need
+    res.write(html[1]);
+    res.end();
+}

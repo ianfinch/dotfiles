@@ -1,0 +1,290 @@
+/* Colours */
+:root {
+    --body-bg: #f0f0ff;
+    --body-fg: #484848;
+    --header-grad-1: #081195;
+    --header-grad-2: #072195;
+    --header-grad-3: #4051b5;
+    --header-bg: linear-gradient(125deg, var( --header-grad-1 ),
+                                     5%, var( --header-grad-2 ),
+                                    10%, var( --header-grad-3 ),
+                                    90%, var( --header-grad-2 ),
+                                    95%, var( --header-grad-1 ));
+    --header-fg: #fff;
+    --article-width: 875px;
+    --article-bg: #fff;
+    --article-fg: var( --body-fg );
+    --article-fg-strong: #000017;
+    --pre-bg: rgb(245, 245, 245);
+    --pre-fg: rgb(54, 70, 78);
+    --success-bg: #c6efce;
+    --success-fg: #006100;
+    --warning-bg: #ffeb9c;
+    --warning-fg:#9c5700;
+    --failure-bg: #ffc7ce;
+    --failure-fg:#9c0006;
+    --border-bg: grey;
+    --table-header-bg: #ccc;
+    --text-file-bg: #002b36;
+    --text-file-fg: #93a1a1;
+    --text-file-font-size: 12px;
+}
+
+/* Set margins for printing */
+@page {
+    size: a4 portrait;
+    margin: 0.5in 0.25in 0.5in 0.25in;
+}
+
+/* Handle printing */
+@media print {
+
+    body {
+        background: var( --article-bg ) !important;
+    }
+
+    body > header {
+        position: static;
+        box-shadow: none;
+        font-size: 12px;
+        line-height: 12px;
+    }
+
+    body > article {
+        width: 210mm;
+        max-width: 210mm;
+        margin: 0 !important;
+    }
+}
+
+/* CSS reset */
+* { box-sizing: border-box; }
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img,
+ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i,
+center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption,
+tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section,
+summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* Style standard elements */
+body {
+  font-family: "Questrial", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 16px;
+  line-height: 24px;
+  background: var( --body-bg );
+  color: var( --body-fg );
+}
+
+/* Mask for when we display a modal */
+div#mask {
+    background: #000000cc;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+}
+
+/* Display the mask when something has been expanded */
+div#mask:has(~ article .expanded) {
+    display: block;
+}
+
+/* Header */
+header {
+    background: var( --header-bg );
+    color: var( --header-fg );
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    padding: 4px 16px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 50;
+    box-shadow: #66666f 0 0 4px 2px;
+}
+
+/* Use article for formatting main content after header */
+article {
+    max-width: var( --article-width );
+    min-height: calc( 100vh - 50px );
+    padding: 12px 32px;
+    margin: 0 auto;
+    background: var( --article-bg );
+    color: var( --article-fg );
+}
+
+header + pre + article {
+    margin-top: 20px;
+}
+
+/* Special case, the article only contains a single pre block (typically from a text-based file) */
+body:has(> article > pre:only-child) {
+    background: var( --text-file-bg );
+}
+
+article:has(> pre:only-child) {
+    background: var( --text-file-bg );
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+}
+
+article:has(> pre:only-child) pre {
+    background: var( --text-file-bg );
+    color: var( --text-file-fg );
+    overflow-x: unset;
+}
+article:has(> pre:only-child) code {
+    font-size: var( --text-file-font-size );
+    line-height: var( --text-file-font-size );
+}
+
+/* Style our headings */
+h1, h2, h3, h4 { font-family: "Quattrocento", serif; color: #000; }
+h1 { font-size: 32px; line-height: 40px; font-weight: 400; margin-bottom: 16px; }
+h2 { font-size: 24px; line-height: 30px; font-weight: 400; margin-bottom: 16px; }
+h3 { font-size: 20px; line-height: 25px; font-weight: 400; margin-bottom: 16px; }
+
+p {
+  margin-bottom: 16px;
+}
+
+em, i { font-style: italic; }
+strong, b { font-weight: 700; color: var( --article-fg-strong ); }
+
+code {
+    font-family: "Courier New", monospace;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+p code, li code {
+    background: var( --pre-bg );
+    color: var( --pre-fg );
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+pre {
+    background: var( --pre-bg );
+    color: var( --pre-fg );
+    padding: 0.5em 1em;
+    margin-bottom: 16px;
+    max-width: calc( var( --article-width ) - 2 * 1em );
+    overflow-x: auto;
+}
+
+ul, ol {
+    list-style-position: outside;
+    margin-left: 2em;
+    margin-bottom: 1em;
+    position: relative;
+    max-width: 960px;
+}
+
+/* Leave space between numbered list items */
+ol > li {
+    margin-bottom: 8px;
+}
+
+/* Nested lists we don't want space below */
+li > ul, li > ol {
+    margin-bottom: 0;
+}
+
+/* Leave space above a numbered list inside an unordered list */
+li > ol {
+    margin-top: 8px;
+}
+
+/* Showdown can put in checkboxes for task lists. They have hard-coded -1.6em
+ * left margin which we can't override, so we need to adjust for it instead
+ */
+li.task-list-item:has(input[type=checkbox]) {
+    margin-left: 1.6em;
+}
+
+/* Keep images scaled to fit too */
+p:has(> img:only-child) {
+    max-width: calc( var( --article-width ) - 2 * 1em );
+    cursor: zoom-in;
+}
+
+p > img:only-child {
+    width: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: royalblue;
+  cursor: pointer;
+}
+a:hover {
+  color: firebrick;
+  text-decoration: underline;
+}
+
+hr {
+    margin-bottom: 1em;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    border-color: var ( --border-bg );
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 40px;
+  margin-bottom: 1.5em;
+}
+
+table td, table th {
+  border: 1px solid var( --border-bg );
+  padding: 3px 8px;
+}
+
+table thead {
+  background: var( --table-header-bg );
+  font-weight: bold;
+  color: #000;
+}
+
+blockquote {
+    border-left: 0.25em solid var( --border-bg );
+    padding: 0 0 0 1em;
+}
+
+/* Mermaid diagrams we want a plain background */
+pre:has(> code.mermaid) {
+    background: var( --article-bg );
+    border: 1px solid var( --border-bg );
+    cursor: zoom-in;
+}
+
+/* Allow items to be expanded */
+p:has(> img.expanded:only-child),
+pre.expanded:has(> code.mermaid) {
+    cursor: zoom-out;
+    margin: 16px;
+    max-width: calc( 100% - 32px );
+    position: absolute;
+    left: 0;
+    z-index: 10;
+}
