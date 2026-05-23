@@ -41,11 +41,23 @@ const addStyleSheet = cssFile => {
     head.appendChild(link);
 };
 
+/* Function to check file is in plugins directory, and include it if it is */
+const includePlugin = (file, fn) => {
+
+    if (/^\/plugins\//.test(file)) {
+        fn(file);
+    } else {
+        alert("ERROR: Tried to include non-plugin file: " + file);
+    }
+}
+
 /* Function to handle frontmatter */
 const handleFrontmatter = frontmatter => {
 
     if (frontmatter.css) {
-        addStyleSheet(frontmatter.css);
+        frontmatter.css.split(/, */).forEach(cssFile => {
+            includePlugin(cssFile, addStyleSheet);
+        });
     }
 };
 

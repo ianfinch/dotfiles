@@ -2,18 +2,21 @@
  * Middleware so I can use non-web files from live-server
  */
 
+const fs = require("fs");
+const path = require("node:path");
+
 // Work out where our system directory is
 const systemDir = __dirname.replace("/middleware", "");
 
+// Also need a plugins directory
+const pluginsDir = [ process.env["HOME"], ".local", "share", "live-server", "plugins" ].join(path.sep);
+
 // List of file extensions to pass through unchanged
 const passThrough = [
-    "css",
     "gif",
     "htm",
     "html",
     "jpg",
-    "js",
-    "mjs",
     "pdf",
     "png",
     "svg"
@@ -26,12 +29,32 @@ const mime = {
     mjs: "text/javascript"
 };
 
-// We need to manipulate file paths
-const fs = require("fs");
-const path = require("node:path");
-
 // Read in our HTML template
 const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "webserver.html").toString().split("<!-- CONTENT -->");
+
+// Get the content of a file
+const getFileContent = filepath => {
+
+    if (fs.existsSync(filepath)) {
+        return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
+    }
+
+    console.error("ERROR File not found: " + filepath);
+    return null;
+};
+
+// Write the content of a file to the response
+const writeFileContent = (res, filepath) => {
+
+    const fileContent = getFileContent(filepath);
+    if (fileContent == null) {
+        res.statusCode = 404;
+        res.statusMessage = "Not found";
+        return;
+    }
+
+    res.write(fileContent);
+};
 
 // Actual middleware function
 module.exports = function(req, res, next) {
@@ -44,24 +67,33 @@ module.exports = function(req, res, next) {
     const extension = parsedUrl.ext.replace(/^\./, "");
 
     // Check whether this is a system file
-    if (req.url.match(/^\/system\//)) {
+    if (/^\/system\//.test(req.url)) {
 
         let filepath = req.url;
         filepath = filepath.replace(/^\/system\/lib\//, "/lib/");
         filepath = filepath.replace(/^\/system\//, "/content/");
         filepath = systemDir + path.sep + filepath;
-        const fileContent = fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
-        res.setHeader("Content-Type", mime[extension]);
-        res.write(fileContent);
+        res.setHeader("Content-Type", mime[extension] || "text/plain");
+        writeFileContent(res, filepath);
+        res.end();
+        return;
+    }
+
+    // Check for plugiins
+    if (/^\/plugins\/.+/.test(req.url)) {
+        let filepath = req.url;
+        filepath = filepath.replace(/^\/plugins\//, "");
+        filepath = pluginsDir + path.sep + filepath;
+        res.setHeader("Content-Type", mime[extension] || "text/plain");
+        writeFileContent(res, filepath);
         res.end();
         return;
     }
 
     // Check for favicon
     if (req.url === "/favicon.ico") {
-        const filepath = systemDir + path.sep + "favicon.ico";
-        const fileContent = fs.readFileSync(filepath, { flag: "r" });
-        res.write(fileContent);
+        const filepath = systemDir + path.sep + "content" + path.sep + "favicon.ico";
+        writeFileContent(res, filepath);
         res.end();
         return;
     }
@@ -69,7 +101,7 @@ module.exports = function(req, res, next) {
     // Check whether we just pass this through as is
     const lastChar = req.url.substring(req.url.length - 1, req.url.length);
     const filepath = cwd + (path.sep === "/" ? req.url : req.url.replace(/\//g, path.sep));
-    const isDir = fs.lstatSync(filepath).isDirectory();
+    const isDir = fs.existsSync(filepath) && fs.lstatSync(filepath).isDirectory();
     if (isDir || passThrough.includes(extension)) {
 
         next();
@@ -79,7 +111,7 @@ module.exports = function(req, res, next) {
     // From here on down, we are treating as markdown
     // Work out the name of this page and get the content
     const filename = parsedUrl.base;
-    const fileContent = fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
+    const fileContent = getFileContent(filepath);
     let escapedContent = fileContent.replace(/&/g, "&amp;")
                                     .replace(/</g, "&lt;")
                                     .replace(/>/g, "&gt;");
