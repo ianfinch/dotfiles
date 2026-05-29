@@ -33,27 +33,27 @@ const mime = {
 const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "webserver.html").toString().split("<!-- CONTENT -->");
 
 // Get the content of a file
-const getFileContent = filepath => {
+const getFileContent = (res, filepath) => {
 
     if (fs.existsSync(filepath)) {
         return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
     }
 
     console.error("ERROR File not found: " + filepath);
+    res.statusCode = 404;
+    res.statusMessage = "Not found";
+    res.end();
     return null;
 };
 
 // Write the content of a file to the response
 const writeFileContent = (res, filepath) => {
 
-    const fileContent = getFileContent(filepath);
-    if (fileContent == null) {
-        res.statusCode = 404;
-        res.statusMessage = "Not found";
-        return;
+    const fileContent = getFileContent(res, filepath);
+    if (fileContent) {
+        res.write(fileContent);
+        res.end();
     }
-
-    res.write(fileContent);
 };
 
 // Actual middleware function
@@ -75,7 +75,6 @@ module.exports = function(req, res, next) {
         filepath = systemDir + path.sep + filepath;
         res.setHeader("Content-Type", mime[extension] || "text/plain");
         writeFileContent(res, filepath);
-        res.end();
         return;
     }
 
@@ -86,7 +85,6 @@ module.exports = function(req, res, next) {
         filepath = pluginsDir + path.sep + filepath;
         res.setHeader("Content-Type", mime[extension] || "text/plain");
         writeFileContent(res, filepath);
-        res.end();
         return;
     }
 
@@ -94,7 +92,6 @@ module.exports = function(req, res, next) {
     if (req.url === "/favicon.ico") {
         const filepath = systemDir + path.sep + "content" + path.sep + "favicon.ico";
         writeFileContent(res, filepath);
-        res.end();
         return;
     }
 
@@ -111,7 +108,10 @@ module.exports = function(req, res, next) {
     // From here on down, we are treating as markdown
     // Work out the name of this page and get the content
     const filename = parsedUrl.base;
-    const fileContent = getFileContent(filepath);
+    const fileContent = getFileContent(res, filepath);
+    if (fileContent == null) {
+        return;
+    }
     let escapedContent = fileContent.replace(/&/g, "&amp;")
                                     .replace(/</g, "&lt;")
                                     .replace(/>/g, "&gt;");
