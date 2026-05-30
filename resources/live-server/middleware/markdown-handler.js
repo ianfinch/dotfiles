@@ -8,6 +8,9 @@ const path = require("node:path");
 // Work out where our system directory is
 const systemDir = __dirname.replace("/middleware", "");
 
+// Also work out which directory we are running from
+const cwd = process.cwd();
+
 // Also need a plugins directory
 const pluginsDir = [ process.env["HOME"], ".local", "share", "live-server", "plugins" ].join(path.sep);
 
@@ -32,10 +35,35 @@ const mime = {
 // Read in our HTML template
 const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "webserver.html").toString().split("<!-- CONTENT -->");
 
+// Get a directory listing ready for formatting as markdown
+const getFilesInDirectory = (dirpath) => {
+
+    const doubleSlash = RegExp("\\" + path.sep + "\\" + path.sep);
+
+    return fs.readdirSync(dirpath, { withFileTypes: true })
+                .reduce((result, file) => {
+
+                    const label = file.name;
+                    const link = (file.parentPath + path.sep + file.name)
+                                    .replace(doubleSlash, path.sep)
+                                    .replace(cwd, "");
+                    return result + "\n\n---\n\n[" + label + "](" + link + ")";
+                }, "");
+};
+
 // Get the content of a file
 const getFileContent = (res, filepath) => {
 
     if (fs.existsSync(filepath)) {
+
+        // Handle directories
+        if (fs.lstatSync(filepath).isDirectory()) {
+
+            const title = filepath.replace(cwd, "");
+            return "# " + title + "\n" + getFilesInDirectory(filepath) + "\n\n---\n\n";
+        }
+
+        // Otherwise return the file contents
         return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
     }
 
@@ -58,9 +86,6 @@ const writeFileContent = (res, filepath) => {
 
 // Actual middleware function
 module.exports = function(url, res, next) {
-
-    // Where are we running
-    const cwd = process.cwd();
 
     // Get the file extension
     const parsedUrl = path.parse(url);
@@ -96,10 +121,8 @@ module.exports = function(url, res, next) {
     }
 
     // Check whether we just pass this through as is
-    const lastChar = url.substring(url.length - 1, url.length);
     const filepath = cwd + (path.sep === "/" ? url : url.replace(/\//g, path.sep));
-    const isDir = fs.existsSync(filepath) && fs.lstatSync(filepath).isDirectory();
-    if (isDir || passThrough.includes(extension)) {
+    if (passThrough.includes(extension)) {
 
         next();
         return
@@ -126,7 +149,7 @@ module.exports = function(url, res, next) {
     res.write(html[0].replace(/<!-- TITLE -->/g, dirname + filename));
 
     // If it's markdown, we render it
-    if (extension === "md") {
+    if (extension === "md" || /^# [^# ]/.test(escapedContent)) {
         res.write(escapedContent);
 
     // Mermaid diagram we use mermaid formatting
