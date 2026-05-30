@@ -12,7 +12,10 @@ const systemDir = __dirname.replace("/middleware", "");
 const cwd = process.cwd();
 
 // Also need a plugins directory
-const pluginsDir = [ process.env["HOME"], ".local", "share", "live-server", "plugins" ].join(path.sep);
+const pluginsDir = __dirname.replace("/middleware", "/plugins");
+
+// And icons
+const iconsDir = __dirname.replace("/middleware", "/icons");
 
 // List of file extensions to pass through unchanged
 const passThrough = [
@@ -29,11 +32,41 @@ const passThrough = [
 const mime = {
     css: "text/css",
     js: "text/javascript",
-    mjs: "text/javascript"
+    mjs: "text/javascript",
+    svg: "image/svg+xml"
 };
 
 // Read in our HTML template
 const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "webserver.html").toString().split("<!-- CONTENT -->");
+
+// Work out which icon to use for a file
+const getIcon = file => {
+
+    // Somewhere to keep the icon name
+    let icon = "blank";
+
+    // We may want to know the file extension
+    const extn = path.parse(file.name).ext.replace(/^\./, "");
+
+    // Directories
+    if (file.isDirectory()) { icon = "folder"; }
+
+    // Simple extensions
+    else if (extn) { icon = extn; }
+
+    // Try and work them out
+    else if (/ignore$/.test(file.name)) { icon = "gitignore"; }
+    else if (/^\.docker/.test(file.name)) { icon = "docker"; }
+
+    // Check the icon exists
+    icon = icon + ".svg";
+    if (!fs.existsSync(iconsDir + path.sep + icon)) {
+        icon = "blank.svg";
+    }
+
+    // Give up trying to work it out
+    return icon;
+};
 
 // Get a directory listing ready for formatting as markdown
 const getFilesInDirectory = (dirpath) => {
@@ -47,12 +80,15 @@ const getFilesInDirectory = (dirpath) => {
                     const link = (file.parentPath + path.sep + file.name)
                                     .replace(doubleSlash, path.sep)
                                     .replace(cwd, "");
-                    return result + "\n\n---\n\n[" + label + "](" + link + ")";
+                    const icon = getIcon(file);
+                    const iconTag = "![" + icon + " icon](/icons/" + icon + ")";
+
+                    return result + "\n\n---\n\n" + iconTag + "[" + label + "](" + link + ")";
                 }, "");
 };
 
 // Get the content of a file
-const getFileContent = (res, filepath) => {
+const getFileContent = (res, filepath, options) => {
 
     if (fs.existsSync(filepath)) {
 
@@ -60,26 +96,38 @@ const getFileContent = (res, filepath) => {
         if (fs.lstatSync(filepath).isDirectory()) {
 
             const title = filepath.replace(cwd, "");
-            return "# " + title + "\n" + getFilesInDirectory(filepath) + "\n\n---\n\n";
+            return "---\n" +
+                   "css: /plugins/directory.css\n" +
+                   "---\n" +
+                   "# " + title + "\n" +
+                   getFilesInDirectory(filepath) + "\n\n---\n\n";
         }
 
-        // Otherwise return the file contents
+        // Check for a binary file
+        if (options && options.binary) {
+
+            return fs.readFileSync(filepath, { flag: "r" });
+        }
+
+        // Assume we have text file format
         return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
     }
 
-    console.error("ERROR File not found: " + filepath);
-    res.statusCode = 404;
-    res.statusMessage = "Not found";
-    res.end();
     return null;
 };
 
 // Write the content of a file to the response
-const writeFileContent = (res, filepath) => {
+const writeFileContent = (res, filepath, options) => {
 
-    const fileContent = getFileContent(res, filepath);
+    const fileContent = getFileContent(res, filepath, options);
     if (fileContent) {
+        res.statusCode = 200;
         res.write(fileContent);
+        res.end();
+    } else {
+        console.error("ERROR File not found: " + filepath);
+        res.statusCode = 404;
+        res.statusMessage = "Not found";
         res.end();
     }
 };
@@ -103,7 +151,7 @@ module.exports = function(url, res, next) {
         return;
     }
 
-    // Check for plugiins
+    // Check for plugins
     if (/^\/plugins\/.+/.test(url)) {
         let filepath = url;
         filepath = filepath.replace(/^\/plugins\//, "");
@@ -113,10 +161,20 @@ module.exports = function(url, res, next) {
         return;
     }
 
+    // Check for icons
+    if (/^\/icons\/.+/.test(url)) {
+        let filepath = url;
+        filepath = filepath.replace(/^\/icons\//, "");
+        filepath = iconsDir + path.sep + filepath;
+        res.setHeader("Content-Type", mime[extension] || "text/plain");
+        writeFileContent(res, filepath);
+        return;
+    }
+
     // Check for favicon
     if (url === "/favicon.ico") {
         const filepath = systemDir + path.sep + "content" + path.sep + "favicon.ico";
-        writeFileContent(res, filepath);
+        writeFileContent(res, filepath, { binary: true });
         return;
     }
 
@@ -149,7 +207,7 @@ module.exports = function(url, res, next) {
     res.write(html[0].replace(/<!-- TITLE -->/g, dirname + filename));
 
     // If it's markdown, we render it
-    if (extension === "md" || /^# [^# ]/.test(escapedContent)) {
+    if (extension === "md" || /^# [^# ]/.test(escapedContent) || /^---/.test(escapedContent)) {
         res.write(escapedContent);
 
     // Mermaid diagram we use mermaid formatting
