@@ -6,16 +6,16 @@ const fs = require("fs");
 const path = require("node:path");
 
 // Work out where our system directory is
-const systemDir = __dirname.replace("/middleware", "");
+const systemDir = __dirname.replace(path.sep + "middleware", "");
 
 // Also work out which directory we are running from
 const cwd = process.cwd();
 
 // Also need a plugins directory
-const pluginsDir = __dirname.replace("/middleware", "/plugins");
+const pluginsDir = __dirname.replace(path.sep + "middleware", path.sep + "plugins");
 
 // And icons
-const iconsDir = __dirname.replace("/middleware", "/icons");
+const iconsDir = __dirname.replace(path.sep + "middleware", path.sep + "icons");
 
 // List of file extensions to pass through unchanged
 const passThrough = [
