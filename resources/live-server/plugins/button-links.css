@@ -1,0 +1,15 @@
+a {
+    display: inline-block;
+    background: powderblue;
+    color: slategrey;
+    border: 1px solid lightgrey;
+    border-radius: 4px;
+    padding: 0 8px;
+    margin: 0 4px 8px 0;
+}
+
+a:hover {
+    text-decoration: none;
+    background: darkturquoise;
+    color: white;
+}

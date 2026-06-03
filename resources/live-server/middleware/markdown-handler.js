@@ -30,10 +30,12 @@ const passThrough = [
 
 // MIME types
 const mime = {
-    css: "text/css",
-    js: "text/javascript",
-    mjs: "text/javascript",
-    svg: "image/svg+xml"
+    css:  "text/css",
+    htm:  "text/html",
+    html: "text/html",
+    js:   "text/javascript",
+    mjs:  "text/javascript",
+    svg:  "image/svg+xml"
 };
 
 // Read in our HTML template
@@ -48,15 +50,16 @@ const getIcon = file => {
     // We may want to know the file extension
     const extn = path.parse(file.name).ext.replace(/^\./, "");
 
+    // Special cases
+    if (file.name === ".git") { icon = "folder-git"; }
+    else if (/ignore$/.test(file.name)) { icon = "gitignore"; }
+    else if (/^\.docker/.test(file.name)) { icon = "docker"; }
+
     // Directories
-    if (file.isDirectory()) { icon = "folder"; }
+    else if (file.isDirectory()) { icon = "folder"; }
 
     // Simple extensions
     else if (extn) { icon = extn; }
-
-    // Try and work them out
-    else if (/ignore$/.test(file.name)) { icon = "gitignore"; }
-    else if (/^\.docker/.test(file.name)) { icon = "docker"; }
 
     // Check the icon exists
     icon = icon + ".svg";
