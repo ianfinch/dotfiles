@@ -8,9 +8,6 @@ const path = require("node:path");
 // Work out where our system directory is
 const systemDir = __dirname.replace(path.sep + "middleware", "");
 
-// Also work out which directory we are running from
-const cwd = process.cwd();
-
 // Also need a plugins directory
 const pluginsDir = __dirname.replace(path.sep + "middleware", path.sep + "plugins");
 
@@ -72,7 +69,7 @@ const getIcon = file => {
 };
 
 // Get a directory listing ready for formatting as markdown
-const getFilesInDirectory = (dirpath) => {
+const getFilesInDirectory = (dirpath, rootDir) => {
 
     const doubleSlash = RegExp("\\" + path.sep + "\\" + path.sep);
 
@@ -82,7 +79,7 @@ const getFilesInDirectory = (dirpath) => {
                     const label = file.name;
                     const link = (file.parentPath + path.sep + file.name)
                                     .replace(doubleSlash, path.sep)
-                                    .replace(cwd, "");
+                                    .replace(rootDir, "");
                     const icon = getIcon(file);
                     const iconTag = "![" + icon + " icon](/icons/" + icon + ")";
 
@@ -91,19 +88,19 @@ const getFilesInDirectory = (dirpath) => {
 };
 
 // Get the content of a file
-const getFileContent = (res, filepath, options) => {
+const getFileContent = (res, filepath, rootDir, options) => {
 
     if (fs.existsSync(filepath)) {
 
         // Handle directories
         if (fs.lstatSync(filepath).isDirectory()) {
 
-            const title = filepath.replace(cwd, "");
+            const title = filepath.replace(rootDir, "");
             return "---\n" +
                    "css: /plugins/directory.css\n" +
                    "---\n" +
                    "# " + title + "\n" +
-                   getFilesInDirectory(filepath) + "\n\n---\n\n";
+                   getFilesInDirectory(filepath, rootDir) + "\n\n---\n\n";
         }
 
         // Check for a binary file
@@ -116,13 +113,14 @@ const getFileContent = (res, filepath, options) => {
         return fs.readFileSync(filepath, { encoding: "utf8", flag: "r" });
     }
 
+    console.error("ERROR: File not found: " + filepath);
     return null;
 };
 
 // Write the content of a file to the response
-const writeFileContent = (res, filepath, options) => {
+const writeFileContent = (res, filepath, rootDir, options) => {
 
-    const fileContent = getFileContent(res, filepath, options);
+    const fileContent = getFileContent(res, filepath, rootDir, options);
     if (fileContent) {
         res.statusCode = 200;
         res.write(fileContent);
@@ -136,7 +134,7 @@ const writeFileContent = (res, filepath, options) => {
 };
 
 // Actual middleware function
-module.exports = function(url, res, next) {
+module.exports = function(url, rootDir, res, next) {
 
     // Get the file extension
     const parsedUrl = path.parse(url);
@@ -150,7 +148,7 @@ module.exports = function(url, res, next) {
         filepath = filepath.replace(/^\/system\//, "/content/");
         filepath = systemDir + path.sep + filepath;
         res.setHeader("Content-Type", mime[extension] || "text/plain");
-        writeFileContent(res, filepath);
+        writeFileContent(res, filepath, rootDir);
         return;
     }
 
@@ -160,7 +158,7 @@ module.exports = function(url, res, next) {
         filepath = filepath.replace(/^\/plugins\//, "");
         filepath = pluginsDir + path.sep + filepath;
         res.setHeader("Content-Type", mime[extension] || "text/plain");
-        writeFileContent(res, filepath);
+        writeFileContent(res, filepath, rootDir);
         return;
     }
 
@@ -170,19 +168,19 @@ module.exports = function(url, res, next) {
         filepath = filepath.replace(/^\/icons\//, "");
         filepath = iconsDir + path.sep + filepath;
         res.setHeader("Content-Type", mime[extension] || "text/plain");
-        writeFileContent(res, filepath);
+        writeFileContent(res, filepath, rootDir);
         return;
     }
 
     // Check for favicon
     if (url === "/favicon.ico") {
         const filepath = systemDir + path.sep + "content" + path.sep + "favicon.ico";
-        writeFileContent(res, filepath, { binary: true });
+        writeFileContent(res, filepath, rootDir, { binary: true });
         return;
     }
 
     // Check whether we just pass this through as is
-    const filepath = cwd + (path.sep === "/" ? url : url.replace(/\//g, path.sep));
+    const filepath = rootDir + (path.sep === "/" ? url : url.replace(/\//g, path.sep));
     if (passThrough.includes(extension)) {
 
         next();
@@ -192,8 +190,8 @@ module.exports = function(url, res, next) {
     // From here on down, we are treating as markdown
     // Work out the name of this page and get the content
     const filename = parsedUrl.base;
-    const fileContent = getFileContent(res, filepath);
-    if (fileContent == null) {
+    const fileContent = getFileContent(res, filepath, rootDir);
+    if (fileContent === null) {
         return;
     }
     let escapedContent = fileContent.replace(/&/g, "&amp;")
