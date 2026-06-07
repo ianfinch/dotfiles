@@ -101,7 +101,7 @@ const createSystemFiles = (targetDir) => {
     const root = path.dirname(path.dirname(process.argv[1]));
 
     // Create any directories we need
-    [ "/system", "/system/lib", "/system/plugins", "/system/icons" ].forEach(dir => {
+    [ "/system", "/system/content", "/system/lib", "/system/plugins", "/system/icons" ].forEach(dir => {
 
         if (!fs.existsSync(targetDir + dir)) {
             fs.mkdirSync(targetDir + dir);
@@ -109,7 +109,7 @@ const createSystemFiles = (targetDir) => {
     });
 
     // Copy across the system files
-    const files = [ fs.readdirSync(root + "/content").map(x => ["content/" + x, "system/" + x]),
+    const files = [ fs.readdirSync(root + "/content").map(x => ["content/" + x, "system/content/" + x]),
                     fs.readdirSync(root + "/lib").map(x => ["lib/" + x, "system/lib/" + x]),
                     fs.readdirSync(root + "/plugins").map(x => ["plugins/" + x, "system/plugins/" + x]),
                     fs.readdirSync(root + "/icons").map(x => ["icons/" + x, "system/icons/" + x]) ].flat();

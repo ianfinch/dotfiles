@@ -36,7 +36,7 @@ const mime = {
 };
 
 // Read in our HTML template
-const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "webserver.html").toString().split("<!-- CONTENT -->");
+const html = fs.readFileSync(systemDir + path.sep + "content" + path.sep + "markdown.html").toString().split("<!-- CONTENT -->");
 
 // Work out which icon to use for a file
 const getIcon = file => {
@@ -81,7 +81,7 @@ const getFilesInDirectory = (dirpath, rootDir) => {
                                     .replace(doubleSlash, path.sep)
                                     .replace(rootDir, "");
                     const icon = getIcon(file);
-                    const iconTag = "![" + icon + " icon](/icons/" + icon + ")";
+                    const iconTag = "![" + icon + " icon](/system/icons/" + icon + ")";
 
                     return result + "\n\n---\n\n" + iconTag + "[" + label + "](" + link + ")";
                 }, "");
@@ -97,7 +97,7 @@ const getFileContent = (res, filepath, rootDir, options) => {
 
             const title = filepath.replace(rootDir, "");
             return "---\n" +
-                   "css: /plugins/directory.css\n" +
+                   "css: directory.css\n" +
                    "---\n" +
                    "# " + title + "\n" +
                    getFilesInDirectory(filepath, rootDir) + "\n\n---\n\n";
@@ -145,28 +145,10 @@ module.exports = function(url, rootDir, res, next) {
 
         let filepath = url;
         filepath = filepath.replace(/^\/system\/lib\//, "/lib/");
-        filepath = filepath.replace(/^\/system\//, "/content/");
+        filepath = filepath.replace(/^\/system\/content\//, "/content/");
+        filepath = filepath.replace(/^\/system\/icons\//, "/icons/");
+        filepath = filepath.replace(/^\/system\/plugins\//, "/plugins/");
         filepath = systemDir + path.sep + filepath;
-        res.setHeader("Content-Type", mime[extension] || "text/plain");
-        writeFileContent(res, filepath, rootDir);
-        return;
-    }
-
-    // Check for plugins
-    if (/^\/plugins\/.+/.test(url)) {
-        let filepath = url;
-        filepath = filepath.replace(/^\/plugins\//, "");
-        filepath = pluginsDir + path.sep + filepath;
-        res.setHeader("Content-Type", mime[extension] || "text/plain");
-        writeFileContent(res, filepath, rootDir);
-        return;
-    }
-
-    // Check for icons
-    if (/^\/icons\/.+/.test(url)) {
-        let filepath = url;
-        filepath = filepath.replace(/^\/icons\//, "");
-        filepath = iconsDir + path.sep + filepath;
         res.setHeader("Content-Type", mime[extension] || "text/plain");
         writeFileContent(res, filepath, rootDir);
         return;
