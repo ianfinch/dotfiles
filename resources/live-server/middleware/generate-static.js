@@ -41,8 +41,16 @@ const processOutputFile = (content, targetFile, depth) => {
     // Fix references to system files
     if (/\.html$/.test(targetFile)) {
 
-        content = content.replace(/(src|href)="\/system\//g, "$1=\"./system/");
+        let prefix = ".";
+        if (depth > 0) {
+
+            prefix = Array(depth).fill("..").join("/");
+        }
+        content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
     }
+
+    // Also update any links to *.md to be *_md.html
+    content = content.replace(/\.md\)/g, "_md.html)");
 
     // Write the file
     fs.writeFileSync(targetFile, content);
@@ -72,7 +80,7 @@ const fileCopier = (sourceFile, targetFile) => {
 
     return () => {
 
-        console.log(sourceFile + " -> " + targetFile);
+        fs.copyFileSync(sourceFile, targetFile);
     };
 };
 
@@ -86,7 +94,16 @@ const generateDirectory = (source, target, depth = 0) => {
         const targetFile = target + path.sep + file.name;
         if (fs.lstatSync(sourceFile).isDirectory()) {
 
+            // If we don't have the target directory, create it
+            if (!fs.existsSync(targetFile)) {
+
+                fs.mkdirSync(targetFile);
+            }
+
+            // Generate an index file for the directory
             console.log(sourceFile + "/ -> " + targetFile + "/_index.md");
+
+            // Copy over the directory contents
             generateDirectory(sourceFile, targetFile, depth + 1);
         } else {
 
