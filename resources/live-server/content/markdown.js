@@ -87,6 +87,24 @@ const convertMarkdown = async () => {
         addExpandToggle(elem, elem.classList);
     });
 
+    // If we have tables, use gridjs to lay them out
+    if (gridjs && gridjs.Grid) {
+
+        [...document.getElementsByTagName("table")].forEach(elem => {
+
+            // Add somewhere for the grid to be displayed
+            const targetElem = document.createElement("div");
+            elem.after(targetElem);
+
+            // Render the grid
+            const grid = new gridjs.Grid({
+                from: elem,
+                sort: true,
+                resizable: true
+            }).render(targetElem);
+        });
+    }
+
     // If we have mermaid diagrams, render them
     mermaid.initialize({ startOnLoad: false });
     await mermaid.run({
