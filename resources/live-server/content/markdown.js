@@ -94,6 +94,7 @@ const convertMarkdown = async () => {
 
             // Add somewhere for the grid to be displayed
             const targetElem = document.createElement("div");
+            targetElem.classList.add("injected-grid");
             elem.after(targetElem);
 
             // Render the grid

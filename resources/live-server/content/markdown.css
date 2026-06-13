@@ -255,7 +255,7 @@ table {
   margin-bottom: 1.5em;
 }
 
-table td, table th {
+table th, table td {
   border: 1px solid var( --border-bg );
   padding: 3px 8px;
 }
@@ -264,6 +264,29 @@ table thead {
   background: var( --table-header-bg );
   font-weight: bold;
   color: #000;
+}
+
+/* Align formatting for gridjs */
+.injected-grid .gridjs-wrapper {
+    border-radius: 0;
+    margin-bottom: 1.5em;
+}
+
+.injected-grid .gridjs-th, .injected-grid .gridjs-td {
+    padding: 3px 8px;
+}
+
+.injected-grid .gridjs-th {
+    background-color: var( --table-header-bg );
+    color: #000;
+}
+
+.injected-grid .gridjs-th .gridjs-resizable {
+    background-color: transparent;
+}
+
+.injected-grid .gridjs-th .gridjs-resizable:hover {
+    background-color: #9999cc99;
 }
 
 blockquote {
