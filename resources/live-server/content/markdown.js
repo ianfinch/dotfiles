@@ -9,7 +9,6 @@ converter.setOption("disableForced4SpacesIndentedSublists", true);
 // Work out where our plugins directory is (note that document.currentScript
 // needs to be called when the code is initially being processed
 const pluginDir = document.currentScript.src.split("/").slice(0, -2).join("/") + "/plugins";
-console.log(pluginDir);
 
 /* Function to toggle expanded status on click */
 const addExpandToggle = (elem, targetClassList) => {

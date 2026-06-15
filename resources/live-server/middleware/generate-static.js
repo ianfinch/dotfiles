@@ -46,7 +46,12 @@ const processOutputFile = (content, targetFile, depth) => {
 
             prefix = Array(depth).fill("..").join("/");
         }
+
+        // Fix up links in HTML tags
         content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
+
+        // We also may have system icons in our markdown
+        content = content.replace(/]\(\/system\/icons\//g, "](" + prefix + "/system/icons/");
     }
 
     // Also update any links to *.md to be *_md.html
@@ -101,7 +106,7 @@ const generateDirectory = (source, target, depth = 0) => {
             }
 
             // Generate an index file for the directory
-            console.log(sourceFile + "/ -> " + targetFile + "/_index.md");
+            markdown(sourceFile, "./", resultWriter(targetFile + "/_index.md", depth + 1), () => null);
 
             // Copy over the directory contents
             generateDirectory(sourceFile, targetFile, depth + 1);
