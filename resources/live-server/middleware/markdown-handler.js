@@ -16,10 +16,13 @@ const iconsDir = __dirname.replace(path.sep + "middleware", path.sep + "icons");
 
 // List of file extensions to pass through unchanged
 const passThrough = [
+    "css",
     "gif",
     "htm",
     "html",
     "jpg",
+    "js",
+    "mjs",
     "pdf",
     "png",
     "svg"
