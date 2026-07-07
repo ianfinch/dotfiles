@@ -8,9 +8,6 @@ const path = require("node:path");
 // Work out where our system directory is
 const systemDir = __dirname.replace(path.sep + "middleware", "");
 
-// Also need a plugins directory
-const pluginsDir = __dirname.replace(path.sep + "middleware", path.sep + "plugins");
-
 // And icons
 const iconsDir = __dirname.replace(path.sep + "middleware", path.sep + "icons");
 
@@ -100,7 +97,7 @@ const getFileContent = (res, filepath, rootDir, options) => {
 
             const title = filepath.replace(rootDir, "");
             return "---\n" +
-                   "css: directory.css\n" +
+                   "css: /system/plugins/directory.css\n" +
                    "---\n" +
                    "# " + title + "\n" +
                    getFilesInDirectory(filepath, rootDir) + "\n\n---\n\n";
@@ -143,15 +140,15 @@ module.exports = function(url, rootDir, res, next) {
     const parsedUrl = path.parse(url);
     const extension = parsedUrl.ext.replace(/^\./, "");
 
-    // Check whether this is a system file
-    if (/^\/system\//.test(url)) {
+    // Check whether this is a system file or the plugins directory
+    if (/^\/system\//.test(url) || /^\/plugins\//.test(url)) {
 
         let filepath = url;
-        filepath = filepath.replace(/^\/system\/lib\//, "/lib/");
-        filepath = filepath.replace(/^\/system\/content\//, "/content/");
-        filepath = filepath.replace(/^\/system\/icons\//, "/icons/");
-        filepath = filepath.replace(/^\/system\/plugins\//, "/plugins/");
-        filepath = systemDir + path.sep + filepath;
+        filepath = filepath.replace(/^\/system\/lib\//, systemDir + path.sep + "lib" + path.sep);
+        filepath = filepath.replace(/^\/system\/content\//, systemDir + path.sep + "content" + path.sep);
+        filepath = filepath.replace(/^\/system\/icons\//, systemDir + path.sep + "icons" + path.sep);
+        filepath = filepath.replace(/^\/system\/plugins\//, systemDir + path.sep + "plugins" + path.sep);
+        filepath = filepath.replace(/^\/plugins\//, rootDir + path.sep + "plugins" + path.sep);
         res.setHeader("Content-Type", mime[extension] || "text/plain");
         writeFileContent(res, filepath, rootDir);
         return;

@@ -7,15 +7,16 @@ const fs = require("fs");
 const path = require("path");
 
 // Check the user has passed in a source and target directory
-if (process.argv.length !== 4) {
+if (process.argv.length !== 4 && process.argv.length !== 5) {
 
-    console.error("Syntax: " + path.basename(process.argv[1]) + " <source directory> <target directory>");
+    console.error("Syntax: " + path.basename(process.argv[1]) + " <source directory> <target directory> [<plugin directory>]");
     process.exit(1);
 }
 
 // Quick reference for the directories
 const sourceRoot = process.argv[2];
 const targetRoot = process.argv[3];
+const pluginDir = process.argv[4] || sourceRoot + "/plugins";
 
 // Check we have directories
 if (!fs.existsSync(sourceRoot)) {
@@ -50,8 +51,12 @@ const processOutputFile = (content, targetFile, depth) => {
         // Fix up links in HTML tags
         content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
 
-        // We also may have system icons in our markdown
+        // We may also have system icons in our markdown
         content = content.replace(/]\(\/system\/icons\//g, "](" + prefix + "/system/icons/");
+
+        // We also need to take care of links in our front matter
+        content = content.replace(/css:  *\/system\/plugins\//g, "css: " + prefix + "/system/plugins/");
+        content = content.replace(/css:  *\/plugins\//g, "css: " + prefix + "/plugins/");
     }
 
     // Also update any links to *.md to be *_md.html
@@ -118,12 +123,12 @@ const generateDirectory = (source, target, depth = 0) => {
 };
 
 // Create any system files
-const createSystemFiles = (targetDir) => {
+const createSystemFiles = (targetDir, pluginDir) => {
 
     const root = path.dirname(path.dirname(process.argv[1]));
 
     // Create any directories we need
-    [ "/system", "/system/content", "/system/lib", "/system/plugins", "/system/icons" ].forEach(dir => {
+    [ "/system", "/system/content", "/system/lib", "/system/plugins", "/system/icons", "/plugins" ].forEach(dir => {
 
         if (!fs.existsSync(targetDir + dir)) {
             fs.mkdirSync(targetDir + dir);
@@ -139,7 +144,14 @@ const createSystemFiles = (targetDir) => {
 
         fs.copyFileSync(root + path.sep + source, targetDir + path.sep + target);
     });
+
+    // Copy the plugins
+    const pluginFiles = fs.readdirSync(pluginDir);
+    pluginFiles.forEach(plugin => {
+
+        fs.copyFileSync(pluginDir + path.sep + plugin, targetDir + path.sep + "plugins" + path.sep + plugin);
+    });
 };
 
 generateDirectory(sourceRoot, targetRoot);
-createSystemFiles(targetRoot);
+createSystemFiles(targetRoot, pluginDir);
