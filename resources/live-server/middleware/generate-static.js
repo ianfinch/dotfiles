@@ -77,10 +77,14 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
         // We also need to take care of system and plugin links in our front matter
         content = content.replace(/css:  *\/system\/plugins\//g, "css: " + prefix + "/system/plugins/");
         content = content.replace(/css:  *\/plugins\//g, "css: " + prefix + "/plugins/");
-    }
 
-    // Also update any links to *.md to be *_md.html
-    content = content.replace(/\.md\)/g, "_md.html)");
+        // Update any links to *.md to be *_md.html
+        content = content.replace(/\.md\)/g, "_md.html)");
+
+        // Assume that a link ending with a slash is a directory, so add a
+        // link to the directory listing file
+        content = content.replace(/\/\)/g, "/_index_md.html)");
+    }
 
     // Write the file
     fs.writeFileSync(targetFile, content);
