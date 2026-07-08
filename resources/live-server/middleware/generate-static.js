@@ -49,12 +49,14 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
             const linkRegex = RegExp("]\\(" + sourceUrl, "g");
             content = content.replace(linkRegex, "](.");
 
-            // Also remove the source root from the header and h1
-            const headerRegex = RegExp("<header>/" + sourceRoot);
+            // Also remove the source root from the directory title
             const h1Regex = RegExp("# /" + sourceRoot);
-            content = content.replace(headerRegex, "<header>");
             content = content.replace(h1Regex, "#");
         }
+
+        // Remove the source root from the header
+        const headerRegex = RegExp("<header>/" + sourceRoot);
+        content = content.replace(headerRegex, "<header>");
     }
 
     // Fix references to other files

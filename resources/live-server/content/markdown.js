@@ -41,12 +41,30 @@ const addStyleSheet = cssFile => {
     head.appendChild(link);
 };
 
+/* Function to add a script to the page */
+const addScript = jsFile => {
+
+    const script = createElement("script")
+                    .addAttribute("src", jsFile)
+                    .addAttribute("type", "text/javascript")
+                    .addAttribute("charset", "utf-8")
+                    .value;
+    const head = document.getElementsByTagName("head")[0];
+    head.appendChild(script);
+};
+
 /* Function to handle frontmatter */
 const handleFrontmatter = frontmatter => {
 
     if (frontmatter.css) {
         frontmatter.css.split(/, */).forEach(cssFile => {
             addStyleSheet(cssFile);
+        });
+    }
+
+    if (frontmatter.js) {
+        frontmatter.js.split(/, */).forEach(jsFile => {
+            addScript(jsFile);
         });
     }
 };
