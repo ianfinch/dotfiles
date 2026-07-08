@@ -13,6 +13,9 @@ if (process.argv.length !== 4 && process.argv.length !== 5) {
     process.exit(1);
 }
 
+// Want to know where we are working from
+const pwd = process.cwd();
+
 // Quick reference for the directories
 const sourceRoot = process.argv[2];
 const targetRoot = process.argv[3];
@@ -31,15 +34,30 @@ if (!fs.existsSync(targetRoot)) {
 }
 
 // Process an output file
-const processOutputFile = (content, targetFile, depth) => {
+const processOutputFile = (content, sourceUrl, targetFile, depth) => {
 
-    // Make it an html filename
+    // Give markdown files html filenames
     if (/\.md$/.test(targetFile)) {
 
+        // Update the filename
         targetFile = targetFile.replace(/\.md$/, "_md.html");
+
+        // If it's a directory listing, we need to tweak it slightly
+        if (/\/_index_md\.html$/.test(targetFile)) {
+
+            // Modify the links because they use a full path
+            const linkRegex = RegExp("]\\(" + sourceUrl, "g");
+            content = content.replace(linkRegex, "](.");
+
+            // Also remove the source root from the header and h1
+            const headerRegex = RegExp("<header>/" + sourceRoot);
+            const h1Regex = RegExp("# /" + sourceRoot);
+            content = content.replace(headerRegex, "<header>");
+            content = content.replace(h1Regex, "#");
+        }
     }
 
-    // Fix references to system files
+    // Fix references to other files
     if (/\.html$/.test(targetFile)) {
 
         let prefix = ".";
@@ -48,13 +66,13 @@ const processOutputFile = (content, targetFile, depth) => {
             prefix = Array(depth).fill("..").join("/");
         }
 
-        // Fix up links in HTML tags
+        // Fix up system links in HTML tags
         content = content.replace(/(src|href)="\/system\//g, "$1=\"" + prefix + "/system/");
 
         // We may also have system icons in our markdown
         content = content.replace(/]\(\/system\/icons\//g, "](" + prefix + "/system/icons/");
 
-        // We also need to take care of links in our front matter
+        // We also need to take care of system and plugin links in our front matter
         content = content.replace(/css:  *\/system\/plugins\//g, "css: " + prefix + "/system/plugins/");
         content = content.replace(/css:  *\/plugins\//g, "css: " + prefix + "/plugins/");
     }
@@ -67,7 +85,7 @@ const processOutputFile = (content, targetFile, depth) => {
 };
 
 // Functions to write the result from the markdown middleware
-const resultWriter = (targetFile, depth) => {
+const resultWriter = (sourceUrl, targetFile, depth) => {
 
     // Somewhere to store our result
     let result = "";
@@ -79,7 +97,7 @@ const resultWriter = (targetFile, depth) => {
         write: content => { result = result + content; },
         end: () => {
 
-            processOutputFile(result, targetFile, depth);
+            processOutputFile(result, sourceUrl, targetFile, depth);
             result = "";
         }
     };
@@ -101,6 +119,7 @@ const generateDirectory = (source, target, depth = 0) => {
     files.forEach(file => {
 
         const sourceFile = file.parentPath + path.sep + file.name;
+        const sourceUrl = "/" + sourceFile;
         const targetFile = target + path.sep + file.name;
         if (fs.lstatSync(sourceFile).isDirectory()) {
 
@@ -111,13 +130,13 @@ const generateDirectory = (source, target, depth = 0) => {
             }
 
             // Generate an index file for the directory
-            markdown(sourceFile, "./", resultWriter(targetFile + "/_index.md", depth + 1), () => null);
+            markdown(sourceUrl, pwd, resultWriter(sourceUrl, targetFile + "/_index.md", depth + 1), () => null);
 
             // Copy over the directory contents
             generateDirectory(sourceFile, targetFile, depth + 1);
         } else {
 
-            markdown(sourceFile, "./", resultWriter(targetFile, depth), fileCopier(sourceFile, targetFile));
+            markdown(sourceUrl, pwd, resultWriter(sourceUrl, targetFile, depth), fileCopier(sourceFile, targetFile));
         }
     });
 };
