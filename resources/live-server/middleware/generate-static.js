@@ -29,8 +29,8 @@ if (!fs.existsSync(sourceRoot)) {
 }
 if (!fs.existsSync(targetRoot)) {
 
-    console.error("Error: " + targetRoot + " directory does not exist");
-    process.exit(1);
+    console.error("Info: Creating " + targetRoot);
+    fs.mkdirSync(targetRoot);
 }
 
 // Process an output file
@@ -74,9 +74,9 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
         // We may also have system icons in our markdown
         content = content.replace(/]\(\/system\/icons\//g, "](" + prefix + "/system/icons/");
 
-        // We also need to take care of system and plugin links in our front matter
-        content = content.replace(/css:  *\/system\/plugins\//g, "css: " + prefix + "/system/plugins/");
-        content = content.replace(/css:  *\/plugins\//g, "css: " + prefix + "/plugins/");
+        // We also need to take care of system and plugin links (in frontmatter)
+        content = content.replace(/ \/plugins\//g, " " + prefix + "/plugins/");
+        content = content.replace(/ \/system\/plugins\//g, " " + prefix + "/system/plugins/");
 
         // Update any links to *.md to be *_md.html
         content = content.replace(/\.md\)/g, "_md.html)");
@@ -153,7 +153,7 @@ const createSystemFiles = (targetDir, pluginDir) => {
     const root = path.dirname(path.dirname(process.argv[1]));
 
     // Create any directories we need
-    [ "/system", "/system/content", "/system/lib", "/system/plugins", "/system/icons", "/plugins" ].forEach(dir => {
+    [ "/system", "/system/content", "/system/lib", "/system/plugins", "/system/icons", "/plugins", "/plugins/lib" ].forEach(dir => {
 
         if (!fs.existsSync(targetDir + dir)) {
             fs.mkdirSync(targetDir + dir);
@@ -161,20 +161,22 @@ const createSystemFiles = (targetDir, pluginDir) => {
     });
 
     // Copy across the system files
-    const files = [ fs.readdirSync(root + "/content").map(x => ["content/" + x, "system/content/" + x]),
-                    fs.readdirSync(root + "/lib").map(x => ["lib/" + x, "system/lib/" + x]),
-                    fs.readdirSync(root + "/plugins").map(x => ["plugins/" + x, "system/plugins/" + x]),
-                    fs.readdirSync(root + "/icons").map(x => ["icons/" + x, "system/icons/" + x]) ].flat();
+    const systemSource = root + path.sep;
+    const systemTarget = targetDir + path.sep + "system" + path.sep;
+    const pluginSource = pluginDir + path.sep;
+    const pluginTarget = targetDir + path.sep + "plugins" + path.sep;
+    const files = [ fs.readdirSync(root + "/content").map(x => [systemSource + "content/" + x, systemTarget + "content/" + x]),
+                    fs.readdirSync(root + "/lib").map(x => [systemSource + "lib/" + x, systemTarget + "lib/" + x]),
+                    fs.readdirSync(root + "/plugins").map(x => [systemSource + "plugins/" + x, systemTarget + "plugins/" + x]),
+                    fs.readdirSync(root + "/icons").map(x => [systemSource + "icons/" + x, systemTarget + "icons/" + x]),
+                    fs.readdirSync(pluginDir).map(x => [pluginSource + x, pluginTarget + x]),
+                    fs.readdirSync(pluginDir + "/lib").map(x => [pluginSource + "lib/" + x, pluginTarget + "lib/" + x]),
+                  ].flat();
     files.forEach(([source, target]) => {
 
-        fs.copyFileSync(root + path.sep + source, targetDir + path.sep + target);
-    });
-
-    // Copy the plugins
-    const pluginFiles = fs.readdirSync(pluginDir);
-    pluginFiles.forEach(plugin => {
-
-        fs.copyFileSync(pluginDir + path.sep + plugin, targetDir + path.sep + "plugins" + path.sep + plugin);
+        if (!fs.lstatSync(source).isDirectory()) {
+            fs.copyFileSync(source, target);
+        }
     });
 };
 
