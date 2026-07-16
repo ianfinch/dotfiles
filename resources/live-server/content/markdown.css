@@ -1,20 +1,12 @@
 /* Colours */
 :root {
-    --body-bg: #f0f0ff;
+    --body-bg: #fefefe;
     --body-fg: #484848;
-    --header-grad-1: #081195;
-    --header-grad-2: #072195;
-    --header-grad-3: #4051b5;
-    --header-bg: linear-gradient(125deg, var( --header-grad-1 ),
-                                     5%, var( --header-grad-2 ),
-                                    10%, var( --header-grad-3 ),
-                                    90%, var( --header-grad-2 ),
-                                    95%, var( --header-grad-1 ));
-    --header-fg: #fff;
     --article-width: 875px;
     --article-bg: #fff;
     --article-fg: var( --body-fg );
     --article-fg-strong: #000017;
+    --article-border: #f3f3f3;
     --pre-bg: rgb(245, 245, 245);
     --pre-fg: rgb(54, 70, 78);
     --success-bg: #c6efce;
@@ -41,13 +33,6 @@
 
     body {
         background: var( --article-bg ) !important;
-    }
-
-    body > header {
-        position: static;
-        box-shadow: none;
-        font-size: 12px;
-        line-height: 12px;
     }
 
     body > article {
@@ -98,35 +83,17 @@ div#mask:has(~ article .expanded) {
     display: block;
 }
 
-/* Header */
-header {
-    background: var( --header-bg );
-    color: var( --header-fg );
-    font-family: "Courier New", monospace;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 20px;
-    text-align: center;
-    padding: 4px 16px;
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 50;
-    box-shadow: #66666f 0 0 4px 2px;
-}
-
-/* Use article for formatting main content after header */
+/* Use article for formatting main content */
 article {
     max-width: var( --article-width );
-    min-height: calc( 100vh - 50px );
+    min-height: 100vh;
     padding: 12px 32px;
     margin: 0 auto;
     background: var( --article-bg );
     color: var( --article-fg );
-}
-
-header + pre + article {
-    margin-top: 20px;
+    border-style: solid;
+    border-color: var( --article-border );
+    border-width: 0 1px;
 }
 
 /* Special case, the article only contains a single pre block (typically from a text-based file) */
