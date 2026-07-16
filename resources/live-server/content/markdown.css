@@ -15,7 +15,7 @@
     --warning-fg:#9c5700;
     --failure-bg: #ffc7ce;
     --failure-fg:#9c0006;
-    --border-bg: grey;
+    --border-bg: #d7d7d7;
     --table-header-bg: #ccc;
     --text-file-bg: #002b36;
     --text-file-fg: #93a1a1;
@@ -210,7 +210,7 @@ hr {
     margin-bottom: 1em;
     border-style: solid;
     border-width: 1px 0 0 0;
-    border-color: var ( --border-bg );
+    border-color: var( --border-bg );
 }
 
 /* Tables */

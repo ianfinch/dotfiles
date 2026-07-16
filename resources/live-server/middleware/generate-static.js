@@ -51,12 +51,14 @@ const processOutputFile = (content, sourceUrl, targetFile, depth) => {
 
             // Also remove the source root from the directory title
             const h1Regex = RegExp("# /" + sourceRoot);
-            content = content.replace(h1Regex, "#");
-        }
+            if ("/" + sourceRoot === sourceUrl) {
 
-        // Remove the source root from the header
-        const headerRegex = RegExp("<header>/" + sourceRoot);
-        content = content.replace(headerRegex, "<header>");
+                content = content.replace(h1Regex, "# /");
+            } else {
+
+                content = content.replace(h1Regex, "#");
+            }
+        }
     }
 
     // Fix references to other files
@@ -180,5 +182,6 @@ const createSystemFiles = (targetDir, pluginDir) => {
     });
 };
 
+markdown(path.sep + sourceRoot, pwd, resultWriter("/" + sourceRoot, "." + path.sep + targetRoot + path.sep + "_index.md", 0), () => null);
 generateDirectory(sourceRoot, targetRoot);
 createSystemFiles(targetRoot, pluginDir);

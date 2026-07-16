@@ -77,10 +77,11 @@ const getFilesInDirectory = (dirpath, rootDir) => {
                 .reduce((result, file) => {
 
                     const label = file.name;
+                    const icon = getIcon(file);
                     const link = (file.parentPath + path.sep + file.name)
                                     .replace(doubleSlash, path.sep)
-                                    .replace(rootDir, "");
-                    const icon = getIcon(file);
+                                    .replace(rootDir, "")
+                                    + ( icon === "folder.svg" ? "/" : "" );
                     const iconTag = "![" + icon + " icon](/system/icons/" + icon + ")";
 
                     return result + "\n\n---\n\n" + iconTag + "[" + label + "](" + link + ")";
