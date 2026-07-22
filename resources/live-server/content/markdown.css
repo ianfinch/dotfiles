@@ -1,14 +1,17 @@
-/* Colours */
+/* Light mode by default */
 :root {
     --body-bg: #fefefe;
     --body-fg: #484848;
     --article-width: 875px;
-    --article-bg: #fff;
+    --article-bg: var( --body-bg );
     --article-fg: var( --body-fg );
     --article-fg-strong: #000017;
     --article-border: #f3f3f3;
+    --heading-fg: var( --article-fg );
     --pre-bg: rgb(245, 245, 245);
     --pre-fg: rgb(54, 70, 78);
+    --link-fg: royalblue;
+    --link-hover-fg: firebrick;
     --success-bg: #c6efce;
     --success-fg: #006100;
     --warning-bg: #ffeb9c;
@@ -17,9 +20,24 @@
     --failure-fg:#9c0006;
     --border-bg: #d7d7d7;
     --table-header-bg: #ccc;
+    --table-header-fg: var( --heading-fg );
     --text-file-bg: #002b36;
     --text-file-fg: #93a1a1;
     --text-file-font-size: 12px;
+}
+
+/* Dark mode alternative */
+:has(body.dark-mode) {
+    --body-bg: #202020;
+    --body-fg: #dcddde;
+    --link-fg: rgb(153, 195, 255);
+    --link-hover-fg: rgb(255, 153, 195);
+    --article-fg-strong: #fff;
+    --article-border: #3d444d;
+    --pre-bg: #42444d;
+    --pre-fg: rgb(232, 232, 232);
+    --border-bg: #474747;
+    --table-header-bg: #212830;
 }
 
 /* Set margins for printing */
@@ -119,7 +137,7 @@ article:has(> pre:only-child) code {
 }
 
 /* Style our headings */
-h1, h2, h3, h4 { font-family: "Quattrocento", serif; color: #000; }
+h1, h2, h3, h4 { font-family: "Quattrocento", serif; color: var( --heading-fg ); }
 h1 { font-size: 32px; line-height: 40px; font-weight: 400; margin-bottom: 16px; }
 h2 { font-size: 24px; line-height: 30px; font-weight: 400; margin-bottom: 16px; }
 h3 { font-size: 20px; line-height: 25px; font-weight: 400; margin-bottom: 16px; }
@@ -198,11 +216,11 @@ p > img:only-child {
 
 a {
   text-decoration: none;
-  color: royalblue;
+  color: var( --link-fg );
   cursor: pointer;
 }
 a:hover {
-  color: firebrick;
+  color: var( --link-hover-fg );
   text-decoration: underline;
 }
 
@@ -228,9 +246,9 @@ table th, table td {
 }
 
 table thead {
-  background: var( --table-header-bg );
-  font-weight: bold;
-  color: #000;
+    background: var( --table-header-bg );
+    color: var( --table-header-fg );
+    font-weight: bold;
 }
 
 /* Align formatting for gridjs */
@@ -245,7 +263,7 @@ table thead {
 
 .injected-grid .gridjs-th {
     background-color: var( --table-header-bg );
-    color: #000;
+    color: var( --table-header-fg );
 }
 
 .injected-grid .gridjs-th .gridjs-resizable {
