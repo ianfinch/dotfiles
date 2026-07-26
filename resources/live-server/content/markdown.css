@@ -24,16 +24,21 @@
     --text-file-bg: #002b36;
     --text-file-fg: #93a1a1;
     --text-file-font-size: 12px;
+    --menu-bg: powderblue;
+    --menu-fg: slategrey;
+    --menu-border: lightgrey;
+    --menu-hover-bg: darkturquoise;
+    --menu-hover-fg: white;
 }
 
 /* Dark mode alternative */
 :has(body.dark-mode) {
-    --body-bg: #202020;
+    --body-bg: #203040;
     --body-fg: #dcddde;
     --link-fg: rgb(153, 195, 255);
     --link-hover-fg: rgb(255, 153, 195);
     --article-fg-strong: #fff;
-    --article-border: #3d444d;
+    --article-border: #506070;
     --pre-bg: #42444d;
     --pre-fg: rgb(232, 232, 232);
     --border-bg: #474747;
@@ -295,4 +300,31 @@ pre.expanded:has(> code.mermaid) {
     position: absolute;
     left: 0;
     z-index: 10;
+}
+
+/* Position the menu */
+div#menu {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    opacity: 0.01;
+}
+
+div#menu:hover {
+    opacity: 1;
+}
+
+div#menu > button {
+    display: block;
+    padding: 4px;
+    background: var( --menu-bg );
+    color: var( --menu-fg );
+    outline: inherit;
+    border: 1px solid var( --menu-border );
+    cursor: pointer;
+}
+
+div#menu > button:hover {
+    background: var( --menu-hover-bg );
+    color: var( --menu-hover-fg );
 }
