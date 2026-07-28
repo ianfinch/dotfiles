@@ -103,6 +103,58 @@ const handleFrontmatter = frontmatter => {
     }
 };
 
+/* Function to replace standard tables with gridjs */
+const useEnhancedTables = () => {
+
+    // If we don't have gridjs available, we can't do anything
+    if (!gridjs || !gridjs.Grid) {
+
+        return;
+    }
+
+    // Create the enhanced tables if we haven't done that already
+    const noEnhancedTablesCreated = document.getElementsByClassName("injected-grid").length === 0;
+    if (noEnhancedTablesCreated) {
+
+        [...document.getElementsByTagName("table")].forEach(elem => {
+
+            // Add somewhere for the grid to be displayed
+            const targetElem = document.createElement("div");
+            targetElem.classList.add("injected-grid");
+            elem.after(targetElem);
+
+            // Render the grid
+            const grid = new gridjs.Grid({
+                from: elem,
+                sort: true,
+                resizable: true
+            }).render(targetElem);
+        });
+
+        // gridjs takes care of everything, so we're good to finish now
+        return;
+    }
+
+    // If we get to here, the grid has already been created, but has been hidden
+    [...document.getElementsByClassName("injected-grid")].forEach(grid => {
+
+        grid.style.display = "block";
+        grid.previousSibling.style.display = "none";
+    });
+};
+
+/* Function to use basic tables */
+const useBasicTables = () => {
+
+    // We run through the injected tables, hiding them and making the related
+    // tables visible
+    [...document.getElementsByClassName("injected-grid")].forEach(grid => {
+
+        grid.style.display = "none";
+        grid.previousSibling.style.display = "block";
+    });
+};
+
 /* Function to do the conversion */
 const convertMarkdown = async () => {
 
@@ -134,25 +186,6 @@ const convertMarkdown = async () => {
         addExpandToggle(elem, elem.classList);
     });
 
-    // If we have tables, use gridjs to lay them out
-    if (gridjs && gridjs.Grid) {
-
-        [...document.getElementsByTagName("table")].forEach(elem => {
-
-            // Add somewhere for the grid to be displayed
-            const targetElem = document.createElement("div");
-            targetElem.classList.add("injected-grid");
-            elem.after(targetElem);
-
-            // Render the grid
-            const grid = new gridjs.Grid({
-                from: elem,
-                sort: true,
-                resizable: true
-            }).render(targetElem);
-        });
-    }
-
     // If we have mermaid diagrams, render them
     mermaid.initialize({ startOnLoad: false });
     await mermaid.run({
@@ -174,7 +207,14 @@ const convertMarkdown = async () => {
 const updateTablesButtonLabel = () => {
 
     const tablesButton = document.getElementById("tables");
-    tablesButton.textContent = "Enhanced tables";
+
+    // If we have enhanced tables, we must have injected the grid and the
+    // injected grid must be displayed
+    const injected = [...document.getElementsByClassName("injected-grid")];
+    const usingEnhancedTables = (injected.length > 0 &&
+        injected.filter(x => x.style.display.includes("none")).length === 0);
+
+    tablesButton.textContent = usingEnhancedTables ? "Basic tables" : "Enhanced tables";
 };
 
 /* Set the legend on the plugin enablement button */
@@ -206,6 +246,18 @@ const initMenu = () => {
         }
 
         updateModeButtonLabel();
+    });
+
+    // The tables button
+    document.getElementById("tables").addEventListener("click", e => {
+
+        if (/Enhanced tables/i.test(e.target.textContent)) {
+            useEnhancedTables();
+        } else {
+            useBasicTables();
+        }
+
+        updateTablesButtonLabel();
     });
 
     // Set the labels on the buttons

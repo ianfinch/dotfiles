@@ -21,6 +21,12 @@ $ make
 
 This will create symlinks from this repo to your home folder.
 
+| Make argument | Notes                                          |
+|---------------|------------------------------------------------|
+| all           | cli and gui                                    |
+| cli           | bash files, config, utilities, live-server     |
+| gui           | regolith, terminal, backgrounds, themes, fonts |
+
 ## Additional dot files
 
 ### vim

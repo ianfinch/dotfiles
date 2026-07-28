@@ -43,7 +43,7 @@
     --pre-bg: #42444d;
     --pre-fg: rgb(232, 232, 232);
     --border-bg: #474747;
-    --table-header-bg: #212830;
+    --table-header-bg: #073642;
 }
 
 /* Set margins for printing */
@@ -270,6 +270,22 @@ table thead {
 .injected-grid .gridjs-th {
     background-color: var( --table-header-bg );
     color: var( --table-header-fg );
+    border-color: var( --border-bg );
+}
+
+.injected-grid .gridjs-th:hover {
+    background-color: #657b83;
+    color: white;
+}
+
+.injected-grid .gridjs-tbody {
+    background-color: transparent;
+}
+
+.injected-grid .gridjs-td {
+    background-color: transparent;
+    color: var( --article-fg );
+    border-color: var( --border-bg );
 }
 
 .injected-grid .gridjs-th .gridjs-resizable {
