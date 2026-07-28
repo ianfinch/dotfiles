@@ -6,6 +6,40 @@ converter.setOption("tasklists", true);
 converter.setOption("metadata", true);
 converter.setOption("disableForced4SpacesIndentedSublists", true);
 
+/* Functions to set light or dark mode */
+const setDisplayMode = wantDarkMode => {
+
+    // The class name for when we are in dark mode
+    const darkModeClassName = "dark-mode";
+
+    return () => {
+
+        // Check whether we are already in dark mode
+        const bodyClassList = document.getElementsByTagName("body")[0].classList;
+        const inDarkMode = bodyClassList.contains(darkModeClassName);
+
+        // If the mode we are in matches the mode we want, we don't need to do anything
+        if ((wantDarkMode && inDarkMode) || (!wantDarkMode && !inDarkMode)) {
+
+            return;
+        }
+
+        // Handle the switch to dark mode
+        if (wantDarkMode) {
+
+            bodyClassList.add(darkModeClassName);
+
+        // Handle the switch to light mode
+        } else {
+
+            bodyClassList.remove(darkModeClassName);
+        }
+    };
+};
+
+const setLightMode = setDisplayMode(false);
+const setDarkMode = setDisplayMode(true);
+
 /* Function to toggle expanded status on click */
 const addExpandToggle = (elem, targetClassList) => {
 
@@ -136,8 +170,60 @@ const convertMarkdown = async () => {
     window.dispatchEvent(new Event("markdownConverted"));
 };
 
+/* Set the legend on the enhanced tables button */
+const updateTablesButtonLabel = () => {
+
+    const tablesButton = document.getElementById("tables");
+    tablesButton.textContent = "Enhanced tables";
+};
+
+/* Set the legend on the plugin enablement button */
+const updatePluginsButtonLabel = () => {
+
+    const pluginsButton = document.getElementById("plugins");
+    pluginsButton.textContent = "Enable plugins";
+};
+
+/* Set the legend on the light/dark mode button */
+const updateModeButtonLabel = () => {
+
+    const modeButton = document.getElementById("light-dark");
+    const inDarkMode = document.getElementsByTagName("body")[0].classList.contains("dark-mode");
+    modeButton.textContent = inDarkMode ? "Light mode" : "Dark mode";
+};
+
+/* Initialise the menu */
+const initMenu = () => {
+
+    // Make the mode button work
+    document.getElementById("light-dark").addEventListener("click", e => {
+
+        // Use the label on the button to decide what to do
+        if (/Light/i.test(e.target.textContent)) {
+            setLightMode();
+        } else {
+            setDarkMode();
+        }
+
+        updateModeButtonLabel();
+    });
+
+    // Set the labels on the buttons
+    updateTablesButtonLabel();
+    updatePluginsButtonLabel();
+    updateModeButtonLabel();
+};
+
 // Trigger the conversion after the page has completed loading
 addEventListener("load", () => {
 
+    // Let's use dark mode by default (we can do this immediately because it
+    // changes the body tag which sits outside the Markdown)
+    setDarkMode();
+
+    // Do the markdown conversion
     convertMarkdown();
+
+    // Set up our menu
+    initMenu();
 });
