@@ -29,6 +29,7 @@
     --menu-border: lightgrey;
     --menu-hover-bg: darkturquoise;
     --menu-hover-fg: white;
+    --menu-width: 140px;
 }
 
 /* Dark mode alternative */
@@ -322,6 +323,7 @@ div#menu > button {
     outline: inherit;
     border: 1px solid var( --menu-border );
     cursor: pointer;
+    width: var( --menu-width );
 }
 
 div#menu > button:hover {
