@@ -84,8 +84,8 @@ const getFilesInDirectory = (dirpath, rootDir) => {
                                     + ( icon === "folder.svg" ? "/" : "" );
                     const iconTag = "![" + icon + " icon](/system/icons/" + icon + ")";
 
-                    return result + "\n\n---\n\n" + iconTag + "[" + label + "](" + link + ")";
-                }, "");
+                    return result.concat(iconTag + "[" + label + "](" + link + ")");
+                }, []).join("\n\n---\n\n");
 };
 
 // Get the content of a file
@@ -101,7 +101,7 @@ const getFileContent = (res, filepath, rootDir, options) => {
                    "css: /system/plugins/directory.css\n" +
                    "---\n" +
                    "# " + title + "\n" +
-                   getFilesInDirectory(filepath, rootDir) + "\n\n---\n\n";
+                   getFilesInDirectory(filepath, rootDir) + "\n\n";
         }
 
         // Check for a binary file
@@ -186,9 +186,19 @@ module.exports = function(url, rootDir, res, next) {
         escapedContent = escapedContent + "\n";
     }
 
-    // Render as HTML and embed the file contents
+    // Take the first heading as the page title (or use the file path)
     const dirname = parsedUrl.dir + ( parsedUrl.dir === "/" ? "" : "/");
-    res.write(html[0].replace(/<!-- TITLE -->/g, dirname + filename));
+    let pageTitle = fileContent.replace(/^[^#]*/, "").replace(/[\r\n].*/s, "");
+    if (/^# /.test(pageTitle)) {
+
+        pageTitle = pageTitle.substr(2);
+    } else {
+
+        pageTitle = dirname + filename;
+    }
+
+    // Render as HTML and embed the file contents
+    res.write(html[0].replace(/<!-- TITLE -->/g, pageTitle));
 
     // If it's markdown, we render it
     if (extension === "md" || /^# [^# ]/.test(escapedContent) || /^---/.test(escapedContent)) {
