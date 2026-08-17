@@ -1,12 +1,12 @@
 /* Light mode by default */
 :root {
-    --body-bg: #fefefe;
+    --body-bg: #ededed;
     --body-fg: #484848;
     --article-width: 875px;
-    --article-bg: var( --body-bg );
+    --article-bg: #fefefe;
     --article-fg: var( --body-fg );
     --article-fg-strong: #000017;
-    --article-border: #f3f3f3;
+    --article-border: #d0d0d0;
     --heading-fg: var( --article-fg );
     --pre-bg: rgb(245, 245, 245);
     --pre-fg: rgb(54, 70, 78);
@@ -34,8 +34,9 @@
 
 /* Dark mode alternative */
 :has(body.dark-mode) {
-    --body-bg: #203040;
+    --body-bg: #002b36;
     --body-fg: #dcddde;
+    --article-bg: #203040;
     --link-fg: rgb(153, 195, 255);
     --link-hover-fg: rgb(255, 153, 195);
     --article-fg-strong: #fff;
@@ -43,7 +44,7 @@
     --pre-bg: #42444d;
     --pre-fg: rgb(232, 232, 232);
     --border-bg: #474747;
-    --table-header-bg: #073642;
+    --table-header-bg: #2aa198;
 }
 
 /* Set margins for printing */
@@ -63,6 +64,14 @@
         width: 210mm;
         max-width: 210mm;
         margin: 0 !important;
+    }
+}
+
+/* If there isn't room for the left margin to be reflected on the right side of
+   the article, switch to centring the article */
+@media only screen and (max-width: 1064px) {
+    article {
+        margin: 0 auto !important;
     }
 }
 
@@ -112,7 +121,7 @@ article {
     max-width: var( --article-width );
     min-height: 100vh;
     padding: 12px 32px;
-    margin: 0 auto;
+    margin: 0 0 0 32px;
     background: var( --article-bg );
     color: var( --article-fg );
     border-style: solid;
