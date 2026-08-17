@@ -71,7 +71,7 @@
    the article, switch to centring the article */
 @media only screen and (max-width: 1064px) {
     article {
-        margin: 0 auto !important;
+        margin: 32px auto !important;
     }
 }
 
@@ -119,14 +119,14 @@ div#mask:has(~ article .expanded) {
 /* Use article for formatting main content */
 article {
     max-width: var( --article-width );
-    min-height: 100vh;
     padding: 12px 32px;
-    margin: 0 0 0 32px;
+    margin: 32px;
     background: var( --article-bg );
     color: var( --article-fg );
     border-style: solid;
     border-color: var( --article-border );
-    border-width: 0 1px;
+    border-width: 1px;
+    border-radius: 16px;
 }
 
 /* Special case, the article only contains a single pre block (typically from a text-based file) */
@@ -139,6 +139,7 @@ article:has(> pre:only-child) {
     margin-left: 0;
     margin-right: 0;
     padding: 0;
+    border: none;
 }
 
 article:has(> pre:only-child) pre {
