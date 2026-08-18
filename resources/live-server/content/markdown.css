@@ -3,6 +3,8 @@
     --body-bg: #ededed;
     --body-fg: #484848;
     --article-width: 875px;
+    --article-padding-left: 32px;
+    --article-padding-right: 32px;
     --article-bg: #fefefe;
     --article-fg: var( --body-fg );
     --article-fg-strong: #000017;
@@ -69,9 +71,17 @@
 
 /* If there isn't room for the left margin to be reflected on the right side of
    the article, switch to centring the article */
-@media only screen and (max-width: 1064px) {
-    article {
-        margin: 0 32px auto !important;
+@media only screen and (max-width: 1064px) and (min-width: 875px) {
+    .content {
+        padding-left: calc((100vw - var( --article-width ) - var( --article-padding-right ) - var( --article-padding-left )) / 2);
+    }
+}
+
+/* Once we get really narrow, just set margin */
+@media only screen and (max-width: 875px) {
+    .content {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
     }
 }
 
@@ -102,9 +112,9 @@ body {
   color: var( --body-fg );
 }
 
-/* Heading at the top of the body needs to be spaced properly */
-body > h1 {
-    margin: 16px 0 16px 32px;
+/* The main content area */
+.content {
+    padding: 16px 0 16px 32px;
 }
 
 /* Hide the first heading in the article, because we have duplicated it as the page title */
@@ -129,8 +139,7 @@ div#mask:has(~ article .expanded) {
 /* Use article for formatting main content */
 article {
     max-width: var( --article-width );
-    padding: 16px 32px;
-    margin: 0 32px;
+    padding: 16px var( --article-padding-right ) 16px var( --article-padding-left );
     background: var( --article-bg );
     color: var( --article-fg );
     border-style: solid;
