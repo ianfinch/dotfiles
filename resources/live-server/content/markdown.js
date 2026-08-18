@@ -164,7 +164,7 @@ const convertMarkdown = async () => {
         const text = elem.textContent.replace(/(```[a-z]+) +/g, "$1");
         const html = converter.makeHtml(text);
         elem.insertAdjacentHTML("afterend", "<article>" + html + "</article>");
-        elem.style.display = "none";
+        elem.remove();
 
         handleFrontmatter(converter.getMetadata());
     });
