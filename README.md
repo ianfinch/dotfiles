@@ -16,6 +16,7 @@ This will create symlinks from this repo to your home folder.
 
 ## Related repos
 
-| Repo | Link                                                       |
-|------|------------------------------------------------------------|
-| vim  | [github.com/ianfinch/vim](https://github.com/ianfinch/vim) |
+| Repo        | Link                                                               |
+|-------------|--------------------------------------------------------------------|
+| vim         | [github.com/ianfinch/vim](https://github.com/ianfinch/vim)         |
+| live-server | [github.com/ianfinch/vim](https://github.com/ianfinch/live-server) |

@@ -1,4 +1,0 @@
-{
-	"logLevel": 2,
-	"middleware": [ "__BASE__/resources/live-server/middleware/index.js" ]
-}
