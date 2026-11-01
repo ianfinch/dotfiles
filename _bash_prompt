@@ -64,11 +64,11 @@ gitBranch() {
     echo $branch
 }
 
-machine="$(start 0)$(setColour 0)\h $(chevron 0 1)"
+machine="$(start 0)$(setColour 0)\H $(chevron 0 1)"
 username="$(setColour 1) \u $(chevron 1 2)"
 directory="$(setColour 2) \w\$(gitBranch)$(finish 2)"
 
-setTitle='\e]0;\u@\h:\W\a'
+setTitle='\e]0;\u@\H:\W\a'
 setPrompt="${machine}${username}${directory}\[\e[m\]\n$(prompt 4) "
 
 export PS1="$setTitle$setPrompt"
